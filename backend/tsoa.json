@@ -6,7 +6,7 @@
     "outputDirectory": "generated/",
     "specVersion": 3,
     "basePath": "/",
-    "tags": [{"name": "transcript"}]
+    "tags": [{"name": "posts"}]
   },
   "routes": {
     "routesDir": "generated/",

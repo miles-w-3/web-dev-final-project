@@ -8,7 +8,6 @@ import fs from 'fs/promises';
 import { RegisterRoutes } from '../generated/routes';
 import * as http from 'http';
 
-
 dotenv.config();
 
 const app = Express();

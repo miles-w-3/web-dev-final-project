@@ -8,7 +8,7 @@
 		"schemas": {
 			"UserLogin": {
 				"properties": {
-					"userName": {
+					"email": {
 						"type": "string"
 					},
 					"password": {
@@ -16,7 +16,27 @@
 					}
 				},
 				"required": [
-					"userName",
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserCreate": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name",
 					"password"
 				],
 				"type": "object",
@@ -31,6 +51,26 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
+		"/posts": {
+			"get": {
+				"operationId": "AllPosts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/users": {
 			"get": {
 				"operationId": "GetAll",
@@ -58,27 +98,12 @@
 				"parameters": []
 			}
 		},
-		"/users/login": {
+		"/users/loggedIn": {
 			"post": {
 				"operationId": "LogIn",
 				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"msg": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"msg"
-									],
-									"type": "object"
-								}
-							}
-						}
+					"204": {
+						"description": "No content"
 					}
 				},
 				"security": [],
@@ -94,6 +119,41 @@
 					}
 				}
 			}
+		},
+		"/users/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"200": {
+						"description": "Status 400 if the auth fails, else 201",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										201,
+										400
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "The information for the user creation",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserCreate",
+								"description": "The information for the user creation"
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"servers": [
@@ -103,7 +163,7 @@
 	],
 	"tags": [
 		{
-			"name": "transcript"
+			"name": "posts"
 		}
 	]
 }
