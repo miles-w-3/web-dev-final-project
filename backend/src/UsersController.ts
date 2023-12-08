@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags, Delete, Request, SuccessResponse, Res, TsoaResponse, Security, Middlewares, HttpStatusCodeLiteral } from "tsoa";
+import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags, Delete, Request, SuccessResponse, Res, TsoaResponse, Security, Middlewares, HttpStatusCodeLiteral, Put } from "tsoa";
 import type { UserLogin, UserRegister, UserDetails } from '../../shared/types/users'
 import FirebaseUsage from "./firebase";
 import express from 'express';
@@ -11,34 +11,67 @@ export class UsersController extends Controller {
   @Middlewares(ensureToken)
   public getAll(@Request() req: express.Request) {
     console.log('inside base')
-    return {"msg": "this will get all users"};
+    return { "msg": "this will get all users" };
+  }
+
+  @Put('')
+  @Middlewares(ensureToken)
+  public async updateUser(@Request() req: express.Request, @Body() userDetails: any) {
+    console.log(`In put! ud are ${JSON.stringify(userDetails)}`);
+    console.log(`as is ${JSON.stringify(userDetails as UserDetails)}`);
+    const myUID = req.params.loggedInUid;
+
+    // a user can only update themselves
+    if (myUID !== userDetails.uid) {
+      return 403;
+    }
+
+    console.log(`Going to update name to ${userDetails.name}`)
+    const ref = FirebaseUsage.db.collection('users').doc(myUID);
+    try {
+      // can add more updatable fields in the future
+      await ref.update({name: userDetails.name })
+    }
+    catch(err) {
+      console.error(`Failed to update user data: ${err}`);
+      return 500;
+    }
+    return 200;
   }
 
   @Get('me')
   @Middlewares(ensureToken)
   public async getMyProfile(@Request() req: express.Request,
-  @Res() foundResponse: TsoaResponse<200, UserDetails>) {
+    @Res() foundResponse: TsoaResponse<200, UserDetails>) {
     // my id will be filled into params by middleware
     const myUID = req.params.loggedInUid;
     if (!myUID) {
       this.setStatus(401);
       return;
     }
-    const data = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
-    if (!data) {
-      console.error(`Didn't find user ${myUID} in db`)
-      this.setStatus(404);
-      return;
-    }
-    const userDetails = { uid: data.id, name: data.name, email: data.email, userType: data.userType}
-    foundResponse(200, userDetails);
+    const userDetails = await this._getProfileHelper(myUID)
+    if (userDetails) foundResponse(200, userDetails);
   }
 
-  // @Get('profile/{uid}')
-  // @Middlewares(ensureToken)
-  // public getProfileByID(uid: string) {
+  @Get('profile/{uid}')
+  @Middlewares(ensureToken)
+  public async getProfileByID(uid: string,
+    @Res() foundResponse: TsoaResponse<200, UserDetails>) {
 
-  // }
+    const userDetails = await this._getProfileHelper(uid)
+    if (userDetails) foundResponse(200, userDetails);
+  }
+
+  private async _getProfileHelper(uid: string) {
+    const data = (await FirebaseUsage.db.collection('users').doc(uid).get()).data();
+    if (!data) {
+      console.error(`Didn't find user ${uid} in db`)
+      this.setStatus(404);
+      return undefined;
+    }
+    const userDetails = { uid: data.id, name: data.name, email: data.email, userType: data.userType }
+    return userDetails
+  }
 
 
 
@@ -88,7 +121,7 @@ export class UsersController extends Controller {
     return this._authHelper(req, idToken, true);
   }
 
-  private async _authHelper(req: express.Request, idToken: string, creating=false) {
+  private async _authHelper(req: express.Request, idToken: string, creating = false) {
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     try {
       const authCookie = await FirebaseUsage.auth.createSessionCookie(idToken, { expiresIn });

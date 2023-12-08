@@ -17,7 +17,8 @@ import {
   InputRightElement,
   RadioGroup,
   Radio,
-  useToast
+  useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import { FaUserAlt, FaLock } from "react-icons/fa";
 import { useAuthContext } from "../state/useAuthContext";
@@ -39,6 +40,7 @@ export default function UserAuth() {
   // sign up state fields
   const [userType, setUserType] = useState('finder');
   const [name, setName] = useState('');
+  const [authorizing, setAuthorizing] = useState(false);
   const toast = useToast();
 
   const userContext = useAuthContext();
@@ -181,12 +183,13 @@ export default function UserAuth() {
 
                 <Button
                   borderRadius={0}
+                  disabled={authorizing}
                   variant="solid"
                   colorScheme="green"
                   width="full"
                   onClick={handleSubmit}
                 >
-                  {signingUp ? 'Sign Up' : 'Log In'}
+                  {authorizing ? <Spinner /> : (signingUp ? 'Sign Up' : 'Log In')}
                 </Button>
                 <Button
                   borderRadius={0}

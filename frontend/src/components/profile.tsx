@@ -6,55 +6,54 @@ import { Navigate, useNavigate, useParams } from "react-router"
 import { useAuthContext } from "../state/useAuthContext";
 import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftElement, Stack } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { getLoggedInUserDetails, listUsers } from "../clients/user";
+import { getUserDetails, updateUserDetails } from "../clients/user";
 import { UserDetails } from "../../../shared/types/users";
 
 // we don't want to show logout button when showing someone else's user
 export default function UserProfile() {
-  const [userDetails, setUserDetails] = useState<UserDetails>();
   const userContext = useAuthContext();
-  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState<UserDetails>({ uid: '', email: '', name: '', userType: 'finder'});
+  const [currentUser, setCurrentUser] = useState<string | undefined>(userContext.user?.uid);
   let { profile } = useParams();
+  console.log(`Profile is ${JSON.stringify(profile)}`);
 
   // hook to make sure that we don't see this page when logged out
-  // useEffect(() => {
-  //   // leave this page if we are logged in
-  //   if (!userContext.user) {
-  //     navigate('/auth')
-  //     return
-  //   }
-  // }, [navigate, userContext]);
-  // // if no one is logged in, bail out to login page
-  if (!userContext.user) {
-    return <Navigate to="/auth" />;
-  }
+  useEffect(() => {
 
-  // if url didn't provide a profile, set to the logged in user
-  if (!profile) profile = userContext.user.uid;
+    const handleUserDetails = async (uid: string) => {
+      console.log(`About to get user details for ${uid}`);
+      const result = await getUserDetails(uid);
+      console.log(`in hud, Got user details ${JSON.stringify(result)}`)
+      if (result && result.data) setUserDetails(result.data);
+    }
+    // leave this page if we are logged in
 
-  //getLoggedInUserDetails();
+    if (currentUser) handleUserDetails(currentUser);
+
+  }, [userContext, currentUser, setUserDetails]);
+
 
   // TODO: need to pull the rest of the user info from the db
-  const handleSubmit = () => {
-    // TODO: update fields in db
+  const handleSave = () => {
+    updateUserDetails(userDetails);
   }
 
   const handleLogout = async () => {
     await userContext.logOut();
   }
 
-  const handleTest = async () => {
-    await listUsers();
-  }
 
-  const handleTestTwo = async () => {
-    getLoggedInUserDetails();
+  const handleNameUpdate = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = (event.target as HTMLButtonElement).value;
+    setUserDetails({...userDetails, name: value});
   }
 
 
   // provide an editable profile for our user
-  if (profile === userContext.user.uid) {
-    return (
+
+  return (
+    <>
+      {!(currentUser) && (<Navigate to = "/auth" />)}
       <Flex
         flexDirection="column"
         width="100wh"
@@ -79,27 +78,28 @@ export default function UserProfile() {
                 backgroundColor="whiteAlpha.900"
                 boxShadow="md"
               >
-
                 <div>
-                  Email: todo
-                  User type: todo
+                  <p>Email: {userDetails.email}</p>
+                  <p>Account type: {userDetails.userType}</p>
                 </div>
 
                 <InputGroup>
                   <Input
+                    disabled={currentUser !== userContext.user?.uid}
                     type='text'
                     placeholder="Name"
-                    value={''}
+                    value={userDetails.name}
+                    onChange={event => handleNameUpdate(event)}
                   />
                 </InputGroup>
 
-
                 <Button
+                  hidden={currentUser !== userContext.user?.uid}
                   borderRadius={0}
                   variant="solid"
                   colorScheme="green"
                   width="full"
-                  onClick={handleSubmit}
+                  onClick={handleSave}
                 >
                   Save
                 </Button>
@@ -110,34 +110,13 @@ export default function UserProfile() {
                   width="full"
                   onClick={handleLogout}
                 >
-                  Log out
-                </Button>
-                <Button
-                  borderRadius={0}
-                  variant="solid"
-                  colorScheme="gray"
-                  width="full"
-                  onClick={handleTest}
-                >
-                  Test
-                </Button>
-                <Button
-                  borderRadius={0}
-                  variant="solid"
-                  colorScheme="gray"
-                  width="full"
-                  onClick={handleTestTwo}
-                >
-                  Test
+                Log out
                 </Button>
               </Stack>
             </form>
-
           </Box>
         </Stack>
       </Flex>
-    )
-  }
-  // provide a static profile view for other users
-  return <></>;
+    </>
+  )
 }

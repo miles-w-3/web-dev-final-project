@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import { UserDetails, UserLogin, UserRegister, UserType } from '../../../shared/types/users'
 import webClient from './base'
 
@@ -15,6 +14,17 @@ export async function getLoggedInUserDetails() {
   console.log(`Got logged in user info ${JSON.stringify(result)}`);
 }
 
+export async function getUserDetails(uid: string) {
+  const result = await webClient.get<UserDetails>(`${USERS_URL}/profile/${uid}`);
+  console.log(`ud result is ${JSON.stringify(result)}`);
+  return result;
+}
+
+export function updateUserDetails(userDetails: UserDetails) {
+  console.log(`Putting user details: ${JSON.stringify(userDetails)}`);
+  return webClient.put(USERS_URL, userDetails)
+}
+
 export async function logInUser(idToken: string) {
   const logInInfo: UserLogin = {
     idToken
@@ -22,7 +32,6 @@ export async function logInUser(idToken: string) {
   console.log(`Gonna log in with token ${idToken}`);
   const response = await webClient.post(`${USERS_URL}/login`, logInInfo);
   console.log(`Response was ${JSON.stringify(response)}`);
-
 }
 
 export async function registerUser(email: string, type: string, name: string,

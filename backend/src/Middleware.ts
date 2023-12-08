@@ -1,11 +1,11 @@
 import express from 'express'
 import FirebaseUsage from './firebase';
-import { Cookie } from 'express-session';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 
 // ensure that the token exists. if not, send 401. If so, decode the uid and store
 export async function ensureToken(req: express.Request, res: express.Response, next: express.NextFunction) {
-  console.log(`In middleware, the session is ${req.session.user}`)
+  console.log(`In middleware for ${req.method} at ${req.url}, the session is ${req.session.user}`)
+  if (req.body) console.log(`The body is ${JSON.stringify(req.body)}`);
   if (req.session && req.session.user) {
     try {
       const idToken: DecodedIdToken = await FirebaseUsage.auth.verifySessionCookie(req.session.user);

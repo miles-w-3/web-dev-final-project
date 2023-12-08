@@ -26,9 +26,9 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   function signUp(email: string, password: string) {
     return createUserWithEmailAndPassword(auth, email, password);
   }
-  function logOut() {
+  async function logOut() {
+    await signOut(auth);
     nav('/auth');
-    return signOut(auth);
   }
 
   // add middleware for handling unauth to log the user out
