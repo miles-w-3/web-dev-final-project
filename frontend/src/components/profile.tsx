@@ -4,7 +4,7 @@
 
 import { Navigate, useNavigate, useParams } from "react-router"
 import { useAuthContext } from "../state/useAuthContext";
-import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftElement, Stack } from "@chakra-ui/react";
+import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftElement, Stack, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { getUserDetails, updateUserDetails } from "../clients/user";
 import { UserDetails } from "../../../shared/types/users";
@@ -17,6 +17,7 @@ export default function UserProfile() {
   let { profile } = useParams();
   console.log(`Profile is ${JSON.stringify(profile)}`);
 
+  const toast = useToast();
   // hook to make sure that we don't see this page when logged out
   useEffect(() => {
 
@@ -34,8 +35,23 @@ export default function UserProfile() {
 
 
   // TODO: need to pull the rest of the user info from the db
-  const handleSave = () => {
-    updateUserDetails(userDetails);
+  const handleSave = async () => {
+    const result = await updateUserDetails(userDetails);
+    if (result === 200) {
+      toast({
+        title: 'Successfully updated',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } else {
+      toast({
+        title: 'Failed To save updates',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+    }
   }
 
   const handleLogout = async () => {
@@ -50,10 +66,10 @@ export default function UserProfile() {
 
 
   // provide an editable profile for our user
+  //      {!(currentUser) && (<Navigate to = "/auth" />)}
 
   return (
     <>
-      {!(currentUser) && (<Navigate to = "/auth" />)}
       <Flex
         flexDirection="column"
         width="100wh"

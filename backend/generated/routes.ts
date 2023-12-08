@@ -114,7 +114,7 @@ export function RegisterRoutes(app: express.Router) {
             function UsersController_updateUser(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                    userDetails: {"in":"body","name":"userDetails","required":true,"dataType":"any"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"any"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

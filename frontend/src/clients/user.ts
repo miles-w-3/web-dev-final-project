@@ -20,9 +20,10 @@ export async function getUserDetails(uid: string) {
   return result;
 }
 
-export function updateUserDetails(userDetails: UserDetails) {
+export async function updateUserDetails(userDetails: UserDetails) {
   console.log(`Putting user details: ${JSON.stringify(userDetails)}`);
-  return webClient.put(USERS_URL, userDetails)
+  const result = await webClient.put(USERS_URL, userDetails);
+  return result.status;
 }
 
 export async function logInUser(idToken: string) {

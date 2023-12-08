@@ -16,13 +16,15 @@ export class UsersController extends Controller {
 
   @Put('')
   @Middlewares(ensureToken)
-  public async updateUser(@Request() req: express.Request, @Body() userDetails: any) {
+  public async updateUser(@Request() req: express.Request, @Body() body: any) {
+    // for some reason it fails the validation test, but coerces properly
+    const userDetails = body as UserDetails
     console.log(`In put! ud are ${JSON.stringify(userDetails)}`);
-    console.log(`as is ${JSON.stringify(userDetails as UserDetails)}`);
     const myUID = req.params.loggedInUid;
-
+    console.log(`myuid is ${myUID}`);
     // a user can only update themselves
     if (myUID !== userDetails.uid) {
+      console.warn(`UID ${myUID} is attempting to put userDetails for ${userDetails.uid}`);
       return 403;
     }
 
@@ -69,7 +71,7 @@ export class UsersController extends Controller {
       this.setStatus(404);
       return undefined;
     }
-    const userDetails = { uid: data.id, name: data.name, email: data.email, userType: data.userType }
+    const userDetails = { uid, name: data.name, email: data.email, userType: data.userType }
     return userDetails
   }
 

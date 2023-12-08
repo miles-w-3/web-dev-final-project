@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   Flex,
   Heading,
@@ -10,20 +10,16 @@ import {
   InputLeftElement,
   chakra,
   Box,
-  Link,
-  Avatar,
   FormControl,
-  FormHelperText,
   InputRightElement,
   RadioGroup,
   Radio,
   useToast,
-  Spinner,
 } from "@chakra-ui/react";
 import { FaUserAlt, FaLock } from "react-icons/fa";
 import { useAuthContext } from "../state/useAuthContext";
 import { FirebaseError } from "firebase/app";
-import { logInUser, registerUser } from "../clients/user";
+import { UserType } from "../../../shared/types/users";
 
 const CFaUserAlt = chakra(FaUserAlt);
 const CFaLock = chakra(FaLock);
@@ -38,31 +34,27 @@ export default function UserAuth() {
   const [password, setPassword] = useState('');
 
   // sign up state fields
-  const [userType, setUserType] = useState('finder');
+  const [userType, setUserType] = useState<UserType>('finder');
   const [name, setName] = useState('');
-  const [authorizing, setAuthorizing] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
   const toast = useToast();
 
   const userContext = useAuthContext();
-  const navigate = useNavigate();
 
   async function handleSubmit() {
     if (signingUp) {
       console.log('In here!');
       try {
         // first, add the user to the auth side
-        const signedInUser = await userContext.signUp(email, password);
-        console.log(`Sign in is ${JSON.stringify(signedInUser)}`);
-        const idToken = await signedInUser.user.stsTokenManager.accessToken;
-        // sign in to the backend as well
-        await registerUser(email, userType, name, signedInUser.user.uid, idToken);
-        // TODO: Create route to the backend
+        await userContext.signUp(email, password, userType, name);
+        // we set authorized here because that means register cookie exchange with backend has finished
+        setAuthorized(true);
       } catch(err) {
         let reason = 'Failed to create account'
         if (err instanceof FirebaseError) {
+          console.error(`Error while creating account: ${err.message}`);
           reason = err.message;
         }
-        console.error(`Error while creating account: ${err.message}`);
         toast({
           title: 'Account Creation Error',
           description: reason,
@@ -77,51 +69,41 @@ export default function UserAuth() {
     // handling log in
     console.log(`Logging in email ${email}`);
     try {
-      const loggedInUser = await userContext.logIn(email, password);
-      console.log(`got loggedin user ${JSON.stringify(loggedInUser)}`);
-      const idToken = await loggedInUser.user.stsTokenManager.accessToken;
-      console.log(`Token is ${idToken}`)
-      await logInUser(idToken);
-      navigate('/profile');
+      await userContext.logIn(email, password);
+      // we set authorized here because that means login cookie exchange with backend has finished
+      setAuthorized(true);
     } catch (err) {
       toast({
-        title: 'Invalid Credentials',
+        title: 'Unable to log in',
         description: "Make sure your username and password are correct",
         status: 'error',
         duration: 9000,
         isClosable: true,
       });
-      console.log(`Got the following err when signing in: ${JSON.stringify(err.message)}`)
+      if (err instanceof FirebaseError) console.log(`Got the following err when signing in: ${JSON.stringify(err.message)}`);
     }
   }
 
-  // hook to make sure that we don't see this page when logged in
-  useEffect(() => {
-    // leave this page if we are logged in
-    if (userContext.user) {
-      navigate('/profile')
-    }
-  }, [navigate, userContext])
-
 
   return (
-    <Flex
-      flexDirection="column"
-      width="100wh"
-      height="100vh"
-      backgroundColor="gray.200"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack
-        flexDir="column"
-        mb="2"
+    <>
+      {authorized && <Navigate to='/profile' />}
+      <Flex
+        flexDirection="column"
+        width="100wh"
+        height="100vh"
+        backgroundColor="gray.200"
         justifyContent="center"
         alignItems="center"
       >
+        <Stack
+          flexDir="column"
+          mb="2"
+          justifyContent="center"
+          alignItems="center"
+        >
         <Heading color="green.600">Account</Heading>
         <Box minW={{ base: "90%", md: "468px" }}>
-          { !userContext.user &&
             <form>
               <Stack
                 spacing={4}
@@ -139,7 +121,10 @@ export default function UserAuth() {
                       type="email"
                       placeholder="email"
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
+                      onChange={event => {
+                        const val = event.target.value
+                        if (typeof val === 'string') setEmail(val);
+                      }}
                     />
                   </InputGroup>
                 </FormControl>
@@ -173,7 +158,7 @@ export default function UserAuth() {
                     />
                   </InputGroup>
                 )}
-                {signingUp && <RadioGroup onChange={setUserType} value={userType}>
+                {signingUp && <RadioGroup onChange={ (val) => setUserType(val as UserType)} value={userType}>
                   User Type:
                   <Stack direction='row'>
                     <Radio value='finder'>Finder</Radio>
@@ -183,13 +168,12 @@ export default function UserAuth() {
 
                 <Button
                   borderRadius={0}
-                  disabled={authorizing}
                   variant="solid"
                   colorScheme="green"
                   width="full"
                   onClick={handleSubmit}
                 >
-                  {authorizing ? <Spinner /> : (signingUp ? 'Sign Up' : 'Log In')}
+                  {signingUp ? 'Sign Up' : 'Log In'}
                 </Button>
                 <Button
                   borderRadius={0}
@@ -202,9 +186,10 @@ export default function UserAuth() {
                 </Button>
               </Stack>
             </form>
-          }
-        </Box>
-      </Stack>
-    </Flex>
+
+          </Box>
+        </Stack>
+      </Flex>
+    </>
   )
 }

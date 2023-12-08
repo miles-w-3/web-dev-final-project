@@ -7,11 +7,13 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
+import { logInUser, registerUser } from "../clients/user";
 import { auth } from './firebaseConnect'
 import AuthContext, { AuthContextFields } from './AuthContext'
 import { useNavigate } from "react-router";
 import webClient from "../clients/base";
 import { AxiosError } from "axios";
+import { UserType } from "../../../shared/types/users";
 
 
 // inspired by https://medium.com/@Rushabh_/implementing-user-login-and-signup-with-reactjs-and-firebase-a-comprehensive-guide-7300bd33cb01
@@ -20,15 +22,24 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const nav = useNavigate()
   const [user, setUser] = useState<User | undefined>(undefined);
 
-  function logIn(email: string, password: string) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async function logIn(email: string, password: string) {
+    const loggedInUser: UserCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await loggedInUser.user.getIdToken();
+    console.log(`got loggedin user ${JSON.stringify(loggedInUser)}`);
+    console.log(`Token is ${idToken}`)
+    await logInUser(idToken);
+    console.log(`COMPLETED LOGIN`)
+
   }
-  function signUp(email: string, password: string) {
-    return createUserWithEmailAndPassword(auth, email, password);
+  // TODO: need to do the same thing i've done for login
+  async function signUp(email: string, password: string, userType: UserType, name: string) {
+    const signedInUser = await createUserWithEmailAndPassword(auth, email, password);
+    const idToken = await signedInUser.user.getIdToken();
+    // sign in to the backend as well
+    await registerUser(email, userType, name, signedInUser.user.uid, idToken);
   }
   async function logOut() {
     await signOut(auth);
-    nav('/auth');
   }
 
   // add middleware for handling unauth to log the user out
@@ -47,8 +58,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Auth changed:", currentUser);
       setUser(currentUser ?? undefined);
+      if (!currentUser) {
+        nav('/auth');
+      }
+      console.log("Auth changed:", currentUser);
     });
 
     return (() => {
