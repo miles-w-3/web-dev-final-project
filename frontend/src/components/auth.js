@@ -51,7 +51,7 @@ export default function UserAuth() {
         // first, add the user to the auth side
         const signedInUser = await userContext.signUp(email, password);
         console.log(`Sign in is ${JSON.stringify(signedInUser)}`);
-        const idToken = await userContext.user.getIdToken();
+        const idToken = await signedInUser.user.stsTokenManager.accessToken;
         // sign in to the backend as well
         await registerUser(email, userType, name, signedInUser.user.uid, idToken);
         // TODO: Create route to the backend

@@ -1,10 +1,8 @@
-import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags, Delete, Request, SuccessResponse, Res, TsoaResponse, Security, Middlewares } from "tsoa";
+import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags, Delete, Request, SuccessResponse, Res, TsoaResponse, Security, Middlewares, HttpStatusCodeLiteral } from "tsoa";
 import type { UserLogin, UserRegister, UserDetails } from '../../shared/types/users'
 import FirebaseUsage from "./firebase";
 import express from 'express';
-import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { ensureToken } from "./Middleware";
-
 
 @Route('users')
 export class UsersController extends Controller {
@@ -18,21 +16,29 @@ export class UsersController extends Controller {
 
   @Get('me')
   @Middlewares(ensureToken)
-  public async getMyProfile(@Request() req: express.Request, @Res() foundResponse: TsoaResponse<200, UserDetails>) {
+  public async getMyProfile(@Request() req: express.Request,
+  @Res() foundResponse: TsoaResponse<200, UserDetails>) {
     // my id will be filled into params by middleware
-    const myUiD = req.params.loggedInUid;
-    if (!myUiD) return 401;
-    const data = (await FirebaseUsage.db.collection('users').doc(myUiD).get()).data();
-    if (!data) return 404;
+    const myUID = req.params.loggedInUid;
+    if (!myUID) {
+      this.setStatus(401);
+      return;
+    }
+    const data = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
+    if (!data) {
+      console.error(`Didn't find user ${myUID} in db`)
+      this.setStatus(404);
+      return;
+    }
     const userDetails = { uid: data.id, name: data.name, email: data.email, userType: data.userType}
     foundResponse(200, userDetails);
   }
 
-  @Get('profile/{uid}')
-  @Middlewares(ensureToken)
-  public getProfileByID(uid: string) {
+  // @Get('profile/{uid}')
+  // @Middlewares(ensureToken)
+  // public getProfileByID(uid: string) {
 
-  }
+  // }
 
 
 
@@ -63,8 +69,8 @@ export class UsersController extends Controller {
    * @returns Status 400 if the auth fails, else 201
    */
   @Post('register')
-  public async register(@Body() requestBody: UserRegister) {
-    console.log(`Got messge from front!`)
+  public async register(@Body() requestBody: UserRegister, @Request() req: express.Request) {
+    console.log(`Got messge from front! Creating db with id ${requestBody.uid}`);
     try {
       await FirebaseUsage.db.collection('users').doc(requestBody.uid).set({
         email: requestBody.email,
@@ -78,10 +84,11 @@ export class UsersController extends Controller {
       await FirebaseUsage.auth.deleteUser(requestBody.uid);
       return 400;
     }
-    return 201;
+    const { idToken } = requestBody;
+    return this._authHelper(req, idToken, true);
   }
 
-  private async _authHelper(req: express.Request, idToken: string) {
+  private async _authHelper(req: express.Request, idToken: string, creating=false) {
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     try {
       const authCookie = await FirebaseUsage.auth.createSessionCookie(idToken, { expiresIn });
@@ -90,7 +97,7 @@ export class UsersController extends Controller {
       console.error(`We got ${err}`);
       return 401;
     }
-    return 200;
+    return creating ? 201 : 200;
   }
 
 

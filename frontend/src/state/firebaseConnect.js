@@ -2,7 +2,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, Persistence } from "firebase/auth";
 
-console.log(`Firebase key is ${process.env.REACT_APP_FIREBASE_KEY}`)
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_KEY,

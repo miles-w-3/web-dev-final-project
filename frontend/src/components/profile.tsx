@@ -5,11 +5,13 @@
 import { Navigate, useNavigate, useParams } from "react-router"
 import { useAuthContext } from "../state/useAuthContext";
 import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftElement, Stack } from "@chakra-ui/react";
-import { useEffect } from "react";
-import { listUsers } from "../clients/user";
+import React, { useEffect, useState } from "react";
+import { getLoggedInUserDetails, listUsers } from "../clients/user";
+import { UserDetails } from "../../../shared/types/users";
 
 // we don't want to show logout button when showing someone else's user
 export default function UserProfile() {
+  const [userDetails, setUserDetails] = useState<UserDetails>();
   const userContext = useAuthContext();
   const navigate = useNavigate();
   let { profile } = useParams();
@@ -28,7 +30,9 @@ export default function UserProfile() {
   }
 
   // if url didn't provide a profile, set to the logged in user
-  if (!profile) profile = userContext.user;
+  if (!profile) profile = userContext.user.uid;
+
+  //getLoggedInUserDetails();
 
   // TODO: need to pull the rest of the user info from the db
   const handleSubmit = () => {
@@ -43,10 +47,13 @@ export default function UserProfile() {
     await listUsers();
   }
 
+  const handleTestTwo = async () => {
+    getLoggedInUserDetails();
+  }
+
 
   // provide an editable profile for our user
-  if (profile.uid === userContext.user.uid) {
-    console.log(`In here, but profile is ${JSON.stringify(profile)}`)
+  if (profile === userContext.user.uid) {
     return (
       <Flex
         flexDirection="column"
@@ -62,7 +69,7 @@ export default function UserProfile() {
           justifyContent="center"
           alignItems="center"
         >
-          <Heading color="green.600"> {profile.displayName ?? 'User'}'s Account</Heading>
+          <Heading color="green.600"> {'User'}'s Account</Heading>
           <Box minW={{ base: "90%", md: "468px" }}>
 
             <form>
@@ -74,7 +81,7 @@ export default function UserProfile() {
               >
 
                 <div>
-                  Email: {profile.email}
+                  Email: todo
                   User type: todo
                 </div>
 
@@ -111,6 +118,15 @@ export default function UserProfile() {
                   colorScheme="gray"
                   width="full"
                   onClick={handleTest}
+                >
+                  Test
+                </Button>
+                <Button
+                  borderRadius={0}
+                  variant="solid"
+                  colorScheme="gray"
+                  width="full"
+                  onClick={handleTestTwo}
                 >
                   Test
                 </Button>
