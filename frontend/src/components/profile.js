@@ -2,21 +2,29 @@
 // TODO: If profile from params is defined, show that user's profile instead
 // of the logged in user. helpful because we can reuse components but
 
-import { useNavigate, useParams } from "react-router"
-import { useUserContext } from "../state/currentUserContext";
+import { Navigate, useNavigate, useParams } from "react-router"
+import { useAuthContext } from "../state/useAuthContext";
 import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftElement, Stack } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { listUsers } from "../clients/user";
 
 // we don't want to show logout button when showing someone else's user
 export default function UserProfile() {
-  const userContext = useUserContext();
+  const userContext = useAuthContext();
   const navigate = useNavigate();
   let { profile } = useParams();
 
-
-  // if no one is logged in, bail out to login page
+  // hook to make sure that we don't see this page when logged out
+  // useEffect(() => {
+  //   // leave this page if we are logged in
+  //   if (!userContext.user) {
+  //     navigate('/auth')
+  //     return
+  //   }
+  // }, [navigate, userContext]);
+  // // if no one is logged in, bail out to login page
   if (!userContext.user) {
-    navigate('/auth');
-    return <></>;
+    return <Navigate to="/auth" />;
   }
 
   // if url didn't provide a profile, set to the logged in user
@@ -29,7 +37,10 @@ export default function UserProfile() {
 
   const handleLogout = async () => {
     await userContext.logOut();
-    navigate('/auth');
+  }
+
+  const handleTest = async () => {
+    await listUsers();
   }
 
 
@@ -93,6 +104,15 @@ export default function UserProfile() {
                   onClick={handleLogout}
                 >
                   Log out
+                </Button>
+                <Button
+                  borderRadius={0}
+                  variant="solid"
+                  colorScheme="gray"
+                  width="full"
+                  onClick={handleTest}
+                >
+                  Test
                 </Button>
               </Stack>
             </form>

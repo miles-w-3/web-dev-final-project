@@ -1,12 +1,22 @@
-export interface UserLogin {
-  email: string;
-  password: string;
-}
+export type UserType = 'finder' | 'asker';
 
-export interface UserCreate {
+export interface UserRegister {
   email: string;
   name: string;
-  password: string;
+  userType: UserType;
+  uid: string;
+  idToken: string;
+}
+
+export interface UserDetails {
+  email: string;
+  name: string;
+  userType: UserType;
+  uid: string;
+}
+
+export interface UserLogin {
+  idToken: string;
 }
 
 export interface RequestingUser {

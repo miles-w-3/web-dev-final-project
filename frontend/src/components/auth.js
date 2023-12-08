@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Flex,
@@ -16,10 +16,13 @@ import {
   FormHelperText,
   InputRightElement,
   RadioGroup,
-  Radio
+  Radio,
+  useToast
 } from "@chakra-ui/react";
 import { FaUserAlt, FaLock } from "react-icons/fa";
-import { useUserContext } from "../state/currentUserContext";
+import { useAuthContext } from "../state/useAuthContext";
+import { FirebaseError } from "firebase/app";
+import { logInUser, registerUser } from "../clients/user";
 
 const CFaUserAlt = chakra(FaUserAlt);
 const CFaLock = chakra(FaLock);
@@ -36,30 +39,68 @@ export default function UserAuth() {
   // sign up state fields
   const [userType, setUserType] = useState('finder');
   const [name, setName] = useState('');
+  const toast = useToast();
 
-  const userContext = useUserContext();
+  const userContext = useAuthContext();
   const navigate = useNavigate();
 
   async function handleSubmit() {
-    console.log('handling submit!');
     if (signingUp) {
       console.log('In here!');
-      userContext.signUp();
+      try {
+        // first, add the user to the auth side
+        const signedInUser = await userContext.signUp(email, password);
+        console.log(`Sign in is ${JSON.stringify(signedInUser)}`);
+        const idToken = await userContext.user.getIdToken();
+        // sign in to the backend as well
+        await registerUser(email, userType, name, signedInUser.user.uid, idToken);
+        // TODO: Create route to the backend
+      } catch(err) {
+        let reason = 'Failed to create account'
+        if (err instanceof FirebaseError) {
+          reason = err.message;
+        }
+        console.error(`Error while creating account: ${err.message}`);
+        toast({
+          title: 'Account Creation Error',
+          description: reason,
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        })
+      }
       return;
     }
+
+    // handling log in
     console.log(`Logging in email ${email}`);
     try {
-      await userContext.logIn(email, password);
-      navigate('/account');
+      const loggedInUser = await userContext.logIn(email, password);
+      console.log(`got loggedin user ${JSON.stringify(loggedInUser)}`);
+      const idToken = await loggedInUser.user.stsTokenManager.accessToken;
+      console.log(`Token is ${idToken}`)
+      await logInUser(idToken);
+      navigate('/profile');
     } catch (err) {
+      toast({
+        title: 'Invalid Credentials',
+        description: "Make sure your username and password are correct",
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      });
       console.log(`Got the following err when signing in: ${JSON.stringify(err.message)}`)
     }
   }
 
-  // leave this page if we are logged in
-  if (userContext.user) {
-    navigate('/profile')
-  }
+  // hook to make sure that we don't see this page when logged in
+  useEffect(() => {
+    // leave this page if we are logged in
+    if (userContext.user) {
+      navigate('/profile')
+    }
+  }, [navigate, userContext])
+
 
   return (
     <Flex

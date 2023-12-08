@@ -3,25 +3,26 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PlacesAutocompleteComponent from './components/test';
 import UserAuth from './components/auth';
 import { ChakraProvider } from '@chakra-ui/react';
-import { UserAuthContextProvider } from './state/currentUserContext';
+import { AuthProvider } from './state/AuthProvider';
 import UserProfile from './components/profile';
 
 function App() {
     return (
-        <UserAuthContextProvider>
-            <ChakraProvider>
-                <div className="App">
-                    <Router>
+        <Router>
+            <AuthProvider>
+                <ChakraProvider>
+                    <div className="App">
                         <Routes>
                             <Route path='/search' element={<PlacesAutocompleteComponent />} />
                             <Route path='/auth' element={<UserAuth />} />
                             <Route path='/profile' element={<UserProfile />} />
                             <Route path='/profile/:uid' element={<UserProfile />} />
                         </Routes>
-                    </Router>
-                </div>
-            </ChakraProvider>
-        </UserAuthContextProvider>
+                    </div>
+                </ChakraProvider>
+            </AuthProvider>
+        </Router >
+
     );
 }
 

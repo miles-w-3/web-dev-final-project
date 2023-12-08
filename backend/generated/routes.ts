@@ -12,21 +12,38 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "UserLogin": {
-        "dataType": "refObject",
-        "properties": {
-            "email": {"dataType":"string","required":true},
-            "password": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
+    "UserType": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["finder"]},{"dataType":"enum","enums":["asker"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "UserCreate": {
+    "UserDetails": {
         "dataType": "refObject",
         "properties": {
             "email": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "password": {"dataType":"string","required":true},
+            "userType": {"ref":"UserType","required":true},
+            "uid": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UserLogin": {
+        "dataType": "refObject",
+        "properties": {
+            "idToken": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UserRegister": {
+        "dataType": "refObject",
+        "properties": {
+            "email": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "userType": {"ref":"UserType","required":true},
+            "uid": {"dataType":"string","required":true},
+            "idToken": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -71,6 +88,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UsersController_getAll(request: any, response: any, next: any) {
             const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -89,13 +107,14 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/users/loggedIn',
+        app.get('/users/me',
             ...(fetchMiddlewares<RequestHandler>(UsersController)),
-            ...(fetchMiddlewares<RequestHandler>(UsersController.prototype.logIn)),
+            ...(fetchMiddlewares<RequestHandler>(UsersController.prototype.getMyProfile)),
 
-            function UsersController_logIn(request: any, response: any, next: any) {
+            function UsersController_getMyProfile(request: any, response: any, next: any) {
             const args = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UserLogin"},
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+                    foundResponse: {"in":"res","name":"200","required":true,"ref":"UserDetails"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -107,8 +126,59 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new UsersController();
 
 
-              const promise = controller.logIn.apply(controller, validatedArgs as any);
+              const promise = controller.getMyProfile.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/users/profile/:uid',
+            ...(fetchMiddlewares<RequestHandler>(UsersController)),
+            ...(fetchMiddlewares<RequestHandler>(UsersController.prototype.getProfileByID)),
+
+            function UsersController_getProfileByID(request: any, response: any, next: any) {
+            const args = {
+                    uid: {"in":"path","name":"uid","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new UsersController();
+
+
+              const promise = controller.getProfileByID.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/users/login',
+            ...(fetchMiddlewares<RequestHandler>(UsersController)),
+            ...(fetchMiddlewares<RequestHandler>(UsersController.prototype.login)),
+
+            function UsersController_login(request: any, response: any, next: any) {
+            const args = {
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UserLogin"},
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new UsersController();
+
+
+              const promise = controller.login.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, 200, next);
             } catch (err) {
                 return next(err);
             }
@@ -120,7 +190,7 @@ export function RegisterRoutes(app: express.Router) {
 
             function UsersController_register(request: any, response: any, next: any) {
             const args = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UserCreate"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UserRegister"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

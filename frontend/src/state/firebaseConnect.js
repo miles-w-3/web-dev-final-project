@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, Persistence } from "firebase/auth";
 
 console.log(`Firebase key is ${process.env.REACT_APP_FIREBASE_KEY}`)
 // Your web app's Firebase configuration
@@ -16,4 +16,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+//auth.setPersistence(auth.PPersistence.NONE);
 export default app;
