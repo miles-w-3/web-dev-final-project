@@ -8,12 +8,14 @@ import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, InputLeftEl
 import React, { useEffect, useState } from "react";
 import { getUserDetails, updateUserDetails } from "../clients/user";
 import { UserDetails } from "../../../shared/types/users";
+import { CreatePost } from "./createPost";
 
 // we don't want to show logout button when showing someone else's user
 export default function UserProfile() {
   const userContext = useAuthContext();
   const [userDetails, setUserDetails] = useState<UserDetails>({ uid: '', email: '', name: '', userType: 'finder'});
   const [currentUser, setCurrentUser] = useState<string | undefined>(userContext.user?.uid);
+  const [showingCreatePost, setShowingCreatePost] = useState<boolean>(false);
   let { profile } = useParams();
   console.log(`Profile is ${JSON.stringify(profile)}`);
 
@@ -70,6 +72,7 @@ export default function UserProfile() {
 
   return (
     <>
+      <CreatePost showing={showingCreatePost} hide={() => setShowingCreatePost(false)} />
       <Flex
         flexDirection="column"
         width="100wh"
@@ -119,6 +122,18 @@ export default function UserProfile() {
                 >
                   Save
                 </Button>
+
+                <Button
+                  hidden={currentUser !== userContext.user?.uid || userDetails.userType !== 'asker'}
+                  borderRadius={0}
+                  variant="solid"
+                  colorScheme="blue"
+                  width="full"
+                  onClick={() => setShowingCreatePost(true)}
+                >
+                  Create New Post
+                </Button>
+
                 <Button
                   borderRadius={0}
                   variant="solid"

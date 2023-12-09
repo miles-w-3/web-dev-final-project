@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -6,25 +7,46 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Button,
+  Input,
+  Box,
 } from '@chakra-ui/react'
+import { useAuthContext } from '../state/useAuthContext';
+import PlacesAutocompleteComponent from './test';
 
-export function CreatePost() {
-  <Modal isOpen={true}>
-    <ModalOverlay />
-    <ModalContent>
-      <ModalHeader>Modal Title</ModalHeader>
-      <ModalCloseButton />
-      <ModalBody>
-        <Lorem count={2} />
-      </ModalBody>
+interface CreatePostProps {
+  showing: boolean;
+  hide: () => void
+}
 
-      <ModalFooter>
-        <Button colorScheme='blue' mr={3} onClick={onClose}>
-          Close
-        </Button>
-        <Button variant='ghost'>Secondary Action</Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
+export function CreatePost( { hide, showing }:CreatePostProps) {
+  const authContext = useAuthContext();
+  const onSave = () => {
+
+  };
+
+  return (
+    <Modal isOpen={showing} onClose={hide}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Create Post</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Input placeholder='Post Title'/>
+          <Input placeholder='Description' />
+          <input type="date" name="date-needed"/>
+          <Box padding={2}>
+            <PlacesAutocompleteComponent />
+          </Box>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button colorScheme='blue' mr={3} onClick={onSave}>
+            Save
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
 
 }
