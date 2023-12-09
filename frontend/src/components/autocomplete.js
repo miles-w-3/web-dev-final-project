@@ -11,7 +11,9 @@ function PlacesAutocompleteComponent({ setSelectedLatLang }) {
 
     const handleSelect = async (selectedAddress) => {
         const results = await geocodeByAddress(selectedAddress);
-        await getLatLng(results[0]);
+        const selectedLatLng = await getLatLng(results[0]);
+        console.log(`setting lat lng to ${JSON.stringify(selectedLatLng)}`)
+        setSelectedLatLang(selectedLatLng);
         setAddress(selectedAddress);
 
     };

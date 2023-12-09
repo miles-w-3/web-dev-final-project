@@ -13,7 +13,8 @@ import {
 } from '@chakra-ui/react'
 import { useAuthContext } from '../state/useAuthContext';
 import PlacesAutocompleteComponent from './autocomplete';
-import { Location } from '../../../shared/types/posts';
+import { Location, Post } from '../../../shared/types/posts';
+import { addPost } from '../clients/post';
 
 interface CreatePostProps {
   showing: boolean;
@@ -22,7 +23,7 @@ interface CreatePostProps {
 
 export function CreatePost( { hide, showing }:CreatePostProps) {
   const authContext = useAuthContext();
-  const [title, setTitle] = useState<string>();
+  const [postTitle, setPostTitle] = useState<string>();
   const [description, setDescription] = useState<string>();
   const [selectedLatLang, setSelectedLatLang] = useState<Location>();
   const [selectedTime, setSelectedTime] = useState<Date>(new Date());
@@ -33,15 +34,25 @@ export function CreatePost( { hide, showing }:CreatePostProps) {
 
   const onDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedTime(new Date(e.target.value));
-
   }
 
-  console.log('Test is ' + JSON.stringify((!selectedLatLang || !title || !description)));
 
-  const onSave = () => {
+  const onSave = async () => {
+    if (!selectedLatLang) {
+      return;
+    }
+    const savingPost: Post = {
+      name: postTitle ?? '',
+      description: description ?? '',
+      dateNeeded: selectedTime,
+      datePosted: new Date(),
+      postedBy: authContext?.user?.uid ?? '',
+      location: selectedLatLang,
+    }
 
+    await addPost(savingPost);
+    // TODO: success and failure toast messages
   };
-  console.log(`Title is ${JSON.stringify(title)}`)
   return (
     <Modal isOpen={showing} onClose={hide}>
       <ModalOverlay />
@@ -49,7 +60,7 @@ export function CreatePost( { hide, showing }:CreatePostProps) {
         <ModalHeader>Create Post</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Input placeholder='Post Title' value={title} onChange={e => setTitle(e.target.value)}/>
+          <Input placeholder='Post Title' value={postTitle} onChange={e => setPostTitle(e.target.value)}/>
           <Input placeholder='Description' value={description} onChange={e => setDescription(e.target.value)} />
           <input type="datetime-local" name="date-needed" value={dateValue(selectedTime)} onChange={onDateChange} />
           <Box padding={2}>
@@ -62,7 +73,7 @@ export function CreatePost( { hide, showing }:CreatePostProps) {
             colorScheme='blue'
             mr={3}
             onClick={onSave}
-            hidden={!selectedLatLang || !title || !description}
+            hidden={!selectedLatLang || !postTitle || !description}
           >
             Save
           </Button>

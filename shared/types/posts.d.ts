@@ -9,12 +9,9 @@ export type PostType = 'service' | 'favor';
 export interface Post {
   name: string;
   description: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
+  location: Location;
   datePosted: Date;
   dateNeeded: Date;
   postedBy: string;
-  acceptedBy: string
+  acceptedBy?: string
 }
