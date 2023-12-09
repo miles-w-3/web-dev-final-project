@@ -9,7 +9,10 @@ export type PostType = 'service' | 'favor';
 export interface Post {
   name: string;
   description: string;
-  location?: google.maps.LatLngLiteral;
+  location: {
+    lat: number;
+    lng: number;
+  };
   datePosted: Date;
   dateNeeded: Date;
   postedBy: string;
