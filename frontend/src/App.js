@@ -5,6 +5,7 @@ import UserAuth from './components/auth';
 import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from './state/AuthProvider';
 import UserProfile from './components/profile';
+import { Navigation } from './components/navigation';
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
             <AuthProvider>
                 <ChakraProvider>
                     <div className="App">
+                        <Navigation />
                         <Routes>
                             <Route path='/search' element={<PlacesAutocompleteComponent />} />
                             <Route path='/auth' element={<UserAuth />} />
