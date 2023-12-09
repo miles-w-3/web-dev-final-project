@@ -32,14 +32,15 @@ export default function UserAuth() {
   const [signingUp, setSigningUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const userContext = useAuthContext();
 
   // sign up state fields
   const [userType, setUserType] = useState<UserType>('finder');
   const [name, setName] = useState('');
-  const [authorized, setAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState(userContext.user != null);
   const toast = useToast();
 
-  const userContext = useAuthContext();
+
 
   async function handleSubmit() {
     if (signingUp) {
