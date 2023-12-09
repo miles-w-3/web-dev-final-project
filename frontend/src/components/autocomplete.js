@@ -5,7 +5,9 @@ import PlacesAutocomplete, {
     geocodeByAddress,
     getLatLng,
 } from 'react-places-autocomplete';
-function PlacesAutocompleteComponent() {
+
+
+function PlacesAutocompleteComponent({ setSelectedLatLang }) {
     const [address, setAddress] = useState('');
     const [posts] = useState([
         {
@@ -62,6 +64,8 @@ function PlacesAutocompleteComponent() {
             try {
                 const results = await geocodeByAddress(address);
                 const selectedLatLng = await getLatLng(results[0]);
+                console.log(`Selected lat lang is ${selectedLatLng}`);
+                if (setSelectedLatLang) setSelectedLatLang(selectedLatLng);
 
                 const updatedPosts = await Promise.all(
                     posts.map(async (post) => {

@@ -1,4 +1,8 @@
-import { LatLngLiteral } from 'google.maps';
+
+export type Location = {
+  lat: number;
+  lng: number;
+}
 
 export type PostType = 'service' | 'favor';
 
