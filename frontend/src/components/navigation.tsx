@@ -7,7 +7,7 @@ import { AuthContextFields } from '../state/AuthContext';
 function NavItem({ to, name }:{ to: string, name: string}) {
   return (
     <Link to={to}>
-      <Text display="block">
+      <Text display="block" color='whitesmoke'>
         {name}
       </Text>
     </Link>
@@ -20,8 +20,9 @@ function AccountButton({ authContext }:{ authContext: AuthContextFields}) {
 
   return (
     <Button
-      colorScheme='green.600'>
-      <Link to={dest}>
+      justifyContent='end'
+      color='green.800'>
+      <Link to={dest} color='white'>
         {text}
       </Link>
     </Button>
@@ -31,20 +32,27 @@ function AccountButton({ authContext }:{ authContext: AuthContextFields}) {
 export function Navigation() {
   const authContext = useAuthContext();
   const location = useLocation();
-  const options: Record<string, string> = { 'Posts': '/posts', 'Users': '/users',
-  'Location Search': '/search'}
+  const options: Record<string, string> = {
+    'Home': '/', 'Posts': '/posts', 'Users': '/users',
+    'Location Search': '/search'
+  };
   return (
     <Flex
       as="nav"
-      align="center"
+      align='center'
       justify="space-between"
       wrap="wrap"
       w="100%"
-      mb={8}
-      p={8}
-      bg={["primary.500", "primary.500", "transparent", "transparent"]}
-      color={["white", "white", "primary.700", "primary.700"]}
+      p={4}
+      bgColor='green.600'
     >
+      <Link to='/'>
+        <Text display="block" color='whitesmoke' fontWeight='bold'>
+          Collide
+        </Text>
+      </Link>
+
+
       <Box
         display={{ base: "block", md: "block" }}
         flexBasis={{ base: "100%", md: "auto" }}
@@ -57,12 +65,13 @@ export function Navigation() {
           pt={[4, 4, 0, 0]}
         >
           {Object.keys(options).map((title: string) => (
-            <NavItem to={options[title]} name={title}/>
+            <NavItem key={title} to={options[title]} name={title}/>
           ))}
 
-          <AccountButton authContext={authContext} />
         </Stack>
       </Box>
+      <AccountButton authContext={authContext} />
+
     </Flex>
   )
 }
