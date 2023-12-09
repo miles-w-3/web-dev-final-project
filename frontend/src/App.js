@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import PlacesAutocompleteComponent from './components/test';
+import PlacesAutocompleteComponent from './components/autocomplete';
 import UserAuth from './components/auth';
 import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from './state/AuthProvider';
