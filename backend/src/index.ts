@@ -1,5 +1,7 @@
 import Express from "express";
-import CORS from 'cors';
+import session from 'express-session';
+
+import cors from 'cors';
 import dotenv from "dotenv";
 import { AddressInfo } from 'net';
 
@@ -8,12 +10,35 @@ import fs from 'fs/promises';
 import { RegisterRoutes } from '../generated/routes';
 import * as http from 'http';
 
+declare module 'express-session' {
+  interface SessionData {
+    user: string;
+  }
+}
+
 dotenv.config();
 
 const app = Express();
-app.use(CORS());
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+}));
 app.use(Express.json());
 const server = http.createServer(app);
+
+const sessionOptions: session.SessionOptions = {
+  secret: process.env.SESSION_SECRET as string,
+  resave: false,
+  saveUninitialized: false,
+};
+if (process.env.NODE_ENV !== "development") {
+  sessionOptions.proxy = true;
+  sessionOptions.cookie = {
+    sameSite: "none",
+    secure: true,
+  };
+}
+app.use(session(sessionOptions));
 
 RegisterRoutes(app);
 

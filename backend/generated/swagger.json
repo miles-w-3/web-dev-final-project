@@ -6,23 +6,14 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"UserLogin": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"password": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"password"
-				],
-				"type": "object",
-				"additionalProperties": false
+			"UserType": {
+				"type": "string",
+				"enum": [
+					"finder",
+					"asker"
+				]
 			},
-			"UserCreate": {
+			"UserDetails": {
 				"properties": {
 					"email": {
 						"type": "string"
@@ -30,14 +21,58 @@
 					"name": {
 						"type": "string"
 					},
-					"password": {
+					"userType": {
+						"$ref": "#/components/schemas/UserType"
+					},
+					"uid": {
 						"type": "string"
 					}
 				},
 				"required": [
 					"email",
 					"name",
-					"password"
+					"userType",
+					"uid"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserLogin": {
+				"properties": {
+					"idToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"idToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserRegister": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"userType": {
+						"$ref": "#/components/schemas/UserType"
+					},
+					"uid": {
+						"type": "string"
+					},
+					"idToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name",
+					"userType",
+					"uid",
+					"idToken"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -96,16 +131,112 @@
 				},
 				"security": [],
 				"parameters": []
+			},
+			"put": {
+				"operationId": "UpdateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										200,
+										403,
+										500
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
 			}
 		},
-		"/users/loggedIn": {
-			"post": {
-				"operationId": "LogIn",
+		"/users/me": {
+			"get": {
+				"operationId": "GetMyProfile",
 				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserDetails"
+								}
+							}
+						}
+					},
 					"204": {
 						"description": "No content"
 					}
 				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/profile/{uid}": {
+			"get": {
+				"operationId": "GetProfileByID",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserDetails"
+								}
+							}
+						}
+					},
+					"204": {
+						"description": "No content"
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "uid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/users/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "Successfully logged in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										200,
+										201,
+										401
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Return the current logged in user info",
 				"security": [],
 				"parameters": [],
 				"requestBody": {
@@ -131,8 +262,10 @@
 								"schema": {
 									"type": "number",
 									"enum": [
+										200,
 										201,
-										400
+										400,
+										401
 									]
 								}
 							}
@@ -147,7 +280,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/UserCreate",
+								"$ref": "#/components/schemas/UserRegister",
 								"description": "The information for the user creation"
 							}
 						}
