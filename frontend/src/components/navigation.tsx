@@ -29,12 +29,12 @@ function AccountButton({ authContext }:{ authContext: AuthContextFields}) {
   )
 }
 
-export function Navigation() {
+export function Navigation({ searchCriteria }: { searchCriteria: string }) {
   const authContext = useAuthContext();
   const location = useLocation();
   const options: Record<string, string> = {
     'Home': '/', 'Posts': '/posts', 'Users': '/users',
-    'Location Search': '/search'
+    'Location Search': `/search?criteria=${searchCriteria}`
   };
   return (
     <Flex
@@ -67,6 +67,7 @@ export function Navigation() {
           {Object.keys(options).map((title: string) => (
             <NavItem key={title} to={options[title]} name={title}/>
           ))}
+
 
         </Stack>
       </Box>

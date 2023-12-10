@@ -85,12 +85,11 @@ export class PostsController extends Controller {
     return 200;
   }
 
-
-
   @Get('user')
   @Middlewares(ensureToken)
   // the type of post will be inferred by the type of user
   public async getPostsForUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
   }
+
 }

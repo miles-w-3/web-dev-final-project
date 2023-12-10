@@ -10,14 +10,14 @@ import { Navigation } from './components/navigation';
 import { ServicePost } from './components/service';
 
 function App() {
+    const storedURL = localStorage.getItem('searchCriteria');
     return (
         <Router>
             <AuthProvider>
                 <ChakraProvider>
                     <div className="App">
-                        <Navigation />
+                        <Navigation searchCriteria={storedURL}/>
                         <Routes>
-                            <Route path='/auto' element={<PlacesAutocompleteComponent />} />
                             <Route path='/search' element={<SearchComponent />} />
                             <Route path='/login' element={<UserAuth />} />
                             <Route path='/profile' element={<UserProfile />} />
