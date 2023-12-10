@@ -1,44 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Favor } from "../../../shared/types/posts";
 import { useParams } from "react-router";
-import { getFavor, purchaseService } from "../clients/post";
-import { Box, Button, Divider, Flex, Text, useToast } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { getFavor, acceptFavor } from "../clients/post";
+import { Box, Button, Divider, Flex, Text, Link, useToast } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 
 export function FavorPost() {
-  const { serviceId } = useParams();
+  const { favorId } = useParams();
   const [currentFavor, setCurrentFavor] = useState<Favor | undefined>();
   const authContext = useAuthContext();
-  const [available, setAvailable] = useState<boolean>(true);
   const toast = useToast();
 
   useEffect(() => {
 
     const getCurrentService = async () => {
-      if (!serviceId) {
+      if (!favorId) {
         setCurrentFavor(undefined);
         return;
       }
 
-      const favorFromBackend = await getFavor(serviceId);
+      const favorFromBackend = await getFavor(favorId);
       setCurrentFavor(favorFromBackend);
-      setAvailable(favorFromBackend?.acceptedBy == null);
     }
 
     getCurrentService();
-  }, [serviceId]);
+  }, [favorId]);
 
   const handleAccept = async () => {
-    if (!serviceId || !currentFavor) return;
+    if (!favorId || !currentFavor) return;
     try {
-      const userInfo = await purchaseService(serviceId);
-      setCurrentFavor({
-        ...currentFavor,
+      const userInfo = await acceptFavor(favorId);
+      const updatedFavor = {...currentFavor,
         acceptedBy: userInfo.uid,
         acceptedByName: userInfo.name,
-      })
-      setAvailable(false);
+      };
+      setCurrentFavor(updatedFavor);
     } catch {
       toast({
         title: 'Failed to accept favor',
@@ -56,7 +52,7 @@ export function FavorPost() {
 
   return (
     <>
-      {serviceId && currentFavor && (
+      {favorId && currentFavor && (
         <Box>
           <Text fontSize={18} fontWeight='bold'>
             {currentFavor.name}
@@ -70,13 +66,15 @@ export function FavorPost() {
             <Text>Posted at {currentFavor.datePosted.toString()}</Text>
             <Text>Needed by {currentFavor.dateNeeded.toString()}</Text>
             <Text>
-              Posted by: <Link color='blue' to={`/profile/${currentFavor.postedBy}`}>{currentFavor.postedByName}</Link>
+              Posted by: <Link color='green.600' href={`/profile/${currentFavor.postedBy}`}>{currentFavor.postedByName}</Link>
             </Text>
-            {!available && currentFavor.acceptedBy && (
-              <Link color='blue' to={`/profile/${currentFavor.acceptedBy}`}>
-                Accepted by {currentFavor.acceptedByName}
-              </Link>)}
-            {available && (
+            {currentFavor.acceptedBy && (
+              <Text>
+                Accepted by: <Link color='green.600' href={`/profile/${currentFavor.acceptedBy}`}>
+                  {currentFavor.acceptedByName}
+                </Link>
+              </Text>)}
+            {!currentFavor.acceptedBy && (
               <Text>
                 Available
                 <Button ms={2}

@@ -42,8 +42,8 @@ export class PostsController extends Controller {
       sService.postedByName = postedByName;
       // fill in purchased by name as well
       if (sService.purchasedBy) {
-        const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer'
-        sService.purchasedByName = postedByName;
+        const purchasedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer'
+        sService.purchasedByName = purchasedByName;
       }
       return sService;
     } catch(err){
@@ -61,9 +61,32 @@ export class PostsController extends Controller {
       await FirebaseUsage.db.collection('services').doc(serviceId).update({purchasedBy: myUID});
       const userInfo = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
       if (!userInfo) throw new Error("Didn't get result");
+      userInfo.uid = myUID;
       return userInfo;
     } catch (err) {
       console.error(`Failed to get service ${serviceId}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
+  @Get('favor/{favorId}')
+  @Middlewares(ensureToken)
+  public async getFavor(favorId: string) {
+    try {
+      const result = (await FirebaseUsage.db.collection('favors').doc(favorId).get()).data();
+      if (!result) throw new Error("Didn't get result");
+      const sFavor = result as SerializedFavor;
+      const postedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.postedBy).get()).data()?.name ?? 'Unknown Poster'
+      sFavor.postedByName = postedByName;
+      // fill in accepted by name as well if applicable
+      if (sFavor.acceptedBy) {
+        const acceptedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.acceptedBy).get()).data()?.name ?? 'Unknown Acceptor'
+        sFavor.acceptedByName = acceptedByName;
+      }
+      return sFavor;
+    } catch (err) {
+      console.error(`Failed to get favor ${favorId}: ${JSON.stringify(err)}`);
       this.setStatus(404);
     }
     return {}
@@ -92,7 +115,9 @@ export class PostsController extends Controller {
     try {
       await FirebaseUsage.db.collection('favors').doc(favorId).update({ acceptedBy: myUID });
       const userInfo = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
+      console.log(`Sending user info ${JSON.stringify(userInfo)}`);
       if (!userInfo) throw new Error("Didn't get result");
+      userInfo.uid = myUID;
       return userInfo;
     } catch (err) {
       console.error(`Failed to get service ${favorId}: ${JSON.stringify(err)}`);

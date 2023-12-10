@@ -19,8 +19,8 @@ export async function getService(serviceId: string): Promise<Service | undefined
 
 
 export async function purchaseService(serviceId: string) {
-  const userInfo = await webClient.put<any, UserDetails>(`${POSTS_URL}/service/${serviceId}`);
-  return userInfo;
+  const userInfo = await webClient.put<UserDetails>(`${POSTS_URL}/service/${serviceId}`);
+  return userInfo.data;
 }
 
 export function addFavor(postContent: Favor) {
@@ -39,7 +39,8 @@ export async function getFavor(favorId: string): Promise<Favor | undefined> {
   return favorDetails;
 }
 
-export async function acceptFavor(serviceId: string) {
-  const userInfo = await webClient.put<any, UserDetails>(`${POSTS_URL}/favor/${serviceId}`);
-  return userInfo;
+export async function acceptFavor(favorId: string) {
+  const userInfo = await webClient.put<UserDetails>(`${POSTS_URL}/favor/${favorId}`);
+  console.log(`UserInfo is ${userInfo}`);
+  return userInfo.data;
 }

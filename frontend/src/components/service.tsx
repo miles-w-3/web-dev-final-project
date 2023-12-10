@@ -2,19 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Service } from "../../../shared/types/posts";
 import { useParams } from "react-router";
 import { getService, purchaseService } from "../clients/post";
-import { Box, Button, Divider, Flex, Text, useToast } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Box, Button, Divider, Flex, Text, useToast, Link } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 
 export function ServicePost() {
   const { serviceId } = useParams();
   const [currentService, setCurrentService] = useState<Service | undefined>();
   const authContext = useAuthContext();
-  const [available, setAvailable] = useState<boolean>(true);
   const toast = useToast();
 
   useEffect(() => {
-
     const getCurrentService = async () => {
       if (!serviceId) {
         setCurrentService(undefined);
@@ -23,7 +20,6 @@ export function ServicePost() {
 
       const serviceFromBackend = await getService(serviceId);
       setCurrentService(serviceFromBackend);
-      setAvailable(serviceFromBackend?.purchasedBy == null);
     }
 
     getCurrentService();
@@ -38,7 +34,6 @@ export function ServicePost() {
         purchasedBy: userInfo.uid,
         purchasedByName: userInfo.name,
       })
-      setAvailable(false);
     } catch {
       toast({
         title: 'Failed to purchase service',
@@ -70,13 +65,15 @@ export function ServicePost() {
             <Text>Posted at {currentService.datePosted.toString()}</Text>
             <Text>${currentService.price}</Text>
             <Text>
-              Posted by: <Link color='blue' to={`/profile/${currentService.postedBy}`}>{currentService.postedByName}</Link>
+              Posted by: <Link color='green.600' href={`/profile/${currentService.postedBy}`}>{currentService.postedByName}</Link>
             </Text>
-            {!available && currentService.purchasedBy && (
-              <Link color='blue' to={`/profile/${currentService.purchasedBy}`}>
-                Purchased by {currentService.purchasedByName}
-              </Link>)}
-            {available && (
+            {currentService.purchasedBy && (
+              <Text>
+                Accepted by: <Link color='green.600' href={`/profile/${currentService.purchasedBy}`}>
+                  {currentService.purchasedByName}
+                </Link>
+              </Text>)}
+            {!currentService.purchasedBy && (
               <Text>
                 Available
                 <Button ms={2}
