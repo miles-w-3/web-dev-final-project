@@ -1,5 +1,5 @@
 # Dockerfile for running backend
-FROM node:18-buster-slim
+FROM node:18.18.2-buster-slim
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 COPY ./ /usr/src/app
