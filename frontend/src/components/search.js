@@ -5,6 +5,7 @@ import PlacesAutocomplete, {
     geocodeByAddress,
     getLatLng,
 } from 'react-places-autocomplete';
+import 'bootstrap/dist/css/bootstrap.min.css';
 function SearchComponent() {
     const [address, setAddress] = useState('');
     const [keyword, setKeyword] = useState('');
@@ -35,6 +36,7 @@ function SearchComponent() {
         const results = await geocodeByAddress(selectedAddress);
         await getLatLng(results[0]);
         setAddress(selectedAddress);
+        localStorage.setItem('searchAddress', selectedAddress);
 
     };
     async function calculateDistance(address1, address2) {
@@ -75,13 +77,34 @@ function SearchComponent() {
                 );
                 const sortedPosts = updatedPosts.sort((a, b) => a.distance - b.distance);
                 setSortedPosts(sortedPosts);
+                localStorage.setItem('searchResults', JSON.stringify(sortedPosts));
+
                 navigate(`/search?criteria=${address}`);
+
+                const criteria = new URLSearchParams(window.location.search).get('criteria');
+                localStorage.setItem('searchCriteria', criteria);
+
             } catch (error) {
                 console.error('Error during search:', error);
             }
         }
     };
 
+
+    useEffect(() => {
+        const storedResults = JSON.parse(localStorage.getItem('searchResults'));
+        if (storedResults) {
+            setSortedPosts(storedResults);
+        }
+        const storedAddress = localStorage.getItem('searchAddress');
+        if (storedAddress) {
+            setAddress(storedAddress);
+        }
+        const storedURL = localStorage.getItem('searchCriteria');
+        if (storedURL) {
+            navigate(`/search?criteria=${storedURL}`);
+        }
+    }, []);
 
     return (
         <div>
@@ -118,13 +141,18 @@ function SearchComponent() {
             {sortedPosts.length > 0 && (
                 <div>
                     <h2>Search Results:</h2>
-                    {sortedPosts.map((post) => (
-                        <div key={post.name}>
-                            <h3>{post.name}</h3>
-                            <p>{post.description}</p>
-                            <p>Distance: {post.distance} meters</p>
-                        </div>
-                    ))}
+                    <ul className="list-group">
+                        {sortedPosts.map((post) => (
+                            <li key={post.name} className="list-group-item">
+                                <h3>{post.name}</h3>
+                                <p>{post.description}</p>
+                                <p>Distance: {post.distance} meters</p>
+                                <button className="btn btn-warning" onClick={() =>
+                                    navigate(`/details/${post.name}`)}>View Details
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>

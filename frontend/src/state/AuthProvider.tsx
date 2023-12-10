@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser ?? undefined);
       if (!currentUser) {
-        nav('/auth');
+        nav('/login');
       }
       console.log("Auth changed:", currentUser);
     });
