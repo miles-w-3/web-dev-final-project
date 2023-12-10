@@ -1,9 +1,12 @@
-import { Post } from "../../../shared/types/posts";
+import { Favor, Service } from "../../../shared/types/posts";
 import webClient from "./base";
 
 const POSTS_URL = '/posts'
 
-export async function addPost(postContent: Post) {
-  await webClient.post<Post>(POSTS_URL, postContent);
+export function addService(postContent: Service) {
+  return webClient.post<Service>(`${POSTS_URL}/service`, postContent);
+}
 
+export function addFavor(postContent: Favor) {
+  return webClient.post<Favor>(`${POSTS_URL}/favor`, postContent);
 }

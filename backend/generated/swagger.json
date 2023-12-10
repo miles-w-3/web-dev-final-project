@@ -6,11 +6,99 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"Location": {
+				"properties": {
+					"lng": {
+						"type": "number",
+						"format": "double"
+					},
+					"lat": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"lng",
+					"lat"
+				],
+				"type": "object"
+			},
+			"SerializedService": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"location": {
+						"$ref": "#/components/schemas/Location"
+					},
+					"datePosted": {
+						"type": "string"
+					},
+					"postedBy": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"purchasedBy": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"location",
+					"datePosted",
+					"postedBy",
+					"price"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SerializedFavor": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"location": {
+						"$ref": "#/components/schemas/Location"
+					},
+					"datePosted": {
+						"type": "string"
+					},
+					"dateNeeded": {
+						"type": "string"
+					},
+					"postedBy": {
+						"type": "string"
+					},
+					"acceptedBy": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"location",
+					"datePosted",
+					"dateNeeded",
+					"postedBy"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserType": {
 				"type": "string",
 				"enum": [
-					"finder",
-					"asker"
+					"requestor",
+					"seller"
 				]
 			},
 			"UserDetails": {
@@ -104,9 +192,11 @@
 				},
 				"security": [],
 				"parameters": []
-			},
+			}
+		},
+		"/posts/service": {
 			"post": {
-				"operationId": "AddNewPost",
+				"operationId": "AddNewService",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -114,7 +204,10 @@
 							"application/json": {
 								"schema": {
 									"type": "number",
-									"format": "double"
+									"enum": [
+										200,
+										500
+									]
 								}
 							}
 						}
@@ -126,10 +219,57 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"$ref": "#/components/schemas/SerializedService"
+							}
 						}
 					}
 				}
+			}
+		},
+		"/posts/favor": {
+			"post": {
+				"operationId": "AddNewFavor",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										200,
+										500
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SerializedFavor"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/posts/user": {
+			"get": {
+				"operationId": "GetPostsFor",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/users": {
