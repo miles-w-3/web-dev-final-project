@@ -46,6 +46,12 @@
 					},
 					"purchasedBy": {
 						"type": "string"
+					},
+					"postedByName": {
+						"type": "string"
+					},
+					"purchasedByName": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -80,6 +86,12 @@
 						"type": "string"
 					},
 					"acceptedBy": {
+						"type": "string"
+					},
+					"postedByName": {
+						"type": "string"
+					},
+					"acceptedByName": {
 						"type": "string"
 					}
 				},
@@ -227,6 +239,59 @@
 				}
 			}
 		},
+		"/posts/service/{serviceId}": {
+			"get": {
+				"operationId": "GetService",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {},
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "serviceId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "PurchaseService",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "serviceId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/posts/favor": {
 			"post": {
 				"operationId": "AddNewFavor",
@@ -262,7 +327,7 @@
 		},
 		"/posts/user": {
 			"get": {
-				"operationId": "GetPostsFor",
+				"operationId": "GetPostsForUser",
 				"responses": {
 					"204": {
 						"description": "No content"

@@ -1,5 +1,5 @@
 import { SerializedFavor, SerializedService } from '../../shared/types/posts'
-import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares } from "tsoa";
+import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares, Put } from "tsoa";
 import FirebaseUsage from './firebase'
 import { ensureToken } from "./Middleware";
 import express from 'express';
@@ -35,10 +35,35 @@ export class PostsController extends Controller {
   @Middlewares(ensureToken)
   public async getService(serviceId: string) {
     try {
-      const serializedService = (await FirebaseUsage.db.collection('services').doc(serviceId).get()).data();
-      return serializedService;
+      const result = (await FirebaseUsage.db.collection('services').doc(serviceId).get()).data();
+      if (!result) throw new Error("Didn't get result");
+      const sService = result as SerializedService;
+      const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.postedBy).get()).data()?.name ?? 'Unknown Poster'
+      sService.postedByName = postedByName;
+      // fill in purchased by name as well
+      if (sService.purchasedBy) {
+        const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer'
+        sService.purchasedByName = postedByName;
+      }
+      return sService;
     } catch(err){
-      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(serviceId)}`);
+      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
+  @Put('service/{serviceId}')
+  @Middlewares(ensureToken)
+  public async purchaseService(serviceId: string, @Request() req: express.Request) {
+    const myUID = req.params.loggedInUid;
+    try {
+      await FirebaseUsage.db.collection('services').doc(serviceId).update({purchasedBy: myUID});
+      const userInfo = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
+      if (!userInfo) throw new Error("Didn't get result");
+      return userInfo;
+    } catch (err) {
+      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(err)}`);
       this.setStatus(404);
     }
     return {}

@@ -27,6 +27,8 @@ const models: TsoaRoute.Models = {
             "postedBy": {"dataType":"string","required":true},
             "price": {"dataType":"double","required":true},
             "purchasedBy": {"dataType":"string"},
+            "postedByName": {"dataType":"string"},
+            "purchasedByName": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -41,6 +43,8 @@ const models: TsoaRoute.Models = {
             "dateNeeded": {"dataType":"string","required":true},
             "postedBy": {"dataType":"string","required":true},
             "acceptedBy": {"dataType":"string"},
+            "postedByName": {"dataType":"string"},
+            "acceptedByName": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -140,6 +144,57 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/posts/service/:serviceId',
+            ...(fetchMiddlewares<RequestHandler>(PostsController)),
+            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getService)),
+
+            function PostsController_getService(request: any, response: any, next: any) {
+            const args = {
+                    serviceId: {"in":"path","name":"serviceId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new PostsController();
+
+
+              const promise = controller.getService.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.put('/posts/service/:serviceId',
+            ...(fetchMiddlewares<RequestHandler>(PostsController)),
+            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.purchaseService)),
+
+            function PostsController_purchaseService(request: any, response: any, next: any) {
+            const args = {
+                    serviceId: {"in":"path","name":"serviceId","required":true,"dataType":"string"},
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new PostsController();
+
+
+              const promise = controller.purchaseService.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/posts/favor',
             ...(fetchMiddlewares<RequestHandler>(PostsController)),
             ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.addNewFavor)),
@@ -167,9 +222,9 @@ export function RegisterRoutes(app: express.Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/posts/user',
             ...(fetchMiddlewares<RequestHandler>(PostsController)),
-            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getPostsFor)),
+            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getPostsForUser)),
 
-            function PostsController_getPostsFor(request: any, response: any, next: any) {
+            function PostsController_getPostsForUser(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
@@ -183,7 +238,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new PostsController();
 
 
-              const promise = controller.getPostsFor.apply(controller, validatedArgs as any);
+              const promise = controller.getPostsForUser.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
