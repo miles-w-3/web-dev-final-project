@@ -9,15 +9,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function SearchComponent() {
     const [address, setAddress] = useState('');
     const [keyword, setKeyword] = useState('');
+    const [postType, setPostType] = useState(null);
     const [posts] = useState([
         {
             name: 'Sample Service',
             description: 'This is a sample service post.',
-            location: { lat: 37.7749, lng: -122.4194 },
+            location: { lat: 41.836828, lng: -71.993255 },
             datePosted: new Date(),
-            dateNeeded: new Date(),
             postedBy: 'John Doe',
-            acceptedBy: '',
+            price: 20,
+            purchasedBy: '',
+            postedByName: '',
+            purchasedByName: '',
         },
         {
             name: 'Sample Favor',
@@ -27,6 +30,8 @@ function SearchComponent() {
             dateNeeded: new Date(),
             postedBy: 'Jane Doe',
             acceptedBy: '',
+            postedByName: '',
+            acceptedByName: '',
         },
     ]);
     const [sortedPosts, setSortedPosts] = useState([]);
@@ -46,11 +51,12 @@ function SearchComponent() {
                 {
                     origins: [address1],
                     destinations: [address2],
-                    travelMode : 'DRIVING'
+                    travelMode : 'DRIVING',
+                    unitSystem: google.maps.UnitSystem.IMPERIAL,
                 },
                 (response, status) => {
                     if (status === 'OK' && response.rows.length > 0 && response.rows[0].elements.length > 0) {
-                        const distance = response.rows[0].elements[0].distance.value;
+                        const distance = Math.round(response.rows[0].elements[0].distance.value * 0.000621371);
                         resolve(distance);
                     } else {
                         reject(new Error('Error calculating distance'));
@@ -58,6 +64,12 @@ function SearchComponent() {
                 }
             );
         });
+    }
+
+    const handleSelectPostType = async (selectPostType) => {
+        console.log(selectPostType);
+        setPostType(selectPostType);
+        localStorage.setItem('postType', selectPostType)
     }
 
     const handleGoToSearchResults = async () => {
@@ -75,14 +87,36 @@ function SearchComponent() {
                         return { ...post, distance };
                     })
                 );
-                const sortedPosts = updatedPosts.sort((a, b) => a.distance - b.distance);
+
+                let sortedPosts = updatedPosts.sort((a, b) => a.distance - b.distance);
+
+                sortedPosts = sortedPosts.filter((post) => {
+                    if (postType === 'Service') {
+                        return 'price' in post;
+                    } else if (postType === 'Favor') {
+                        return 'dateNeeded' in post;
+                    }
+                    return true;
+                });
+
+                if(keyword) {
+                    sortedPosts = sortedPosts.filter (
+                        (post) =>
+                            post.name.toLowerCase().includes(keyword.toLowerCase())
+                    )
+                }
+
                 setSortedPosts(sortedPosts);
                 localStorage.setItem('searchResults', JSON.stringify(sortedPosts));
 
-                navigate(`/search?criteria=${address}`);
+                navigate(`/search?criteria=${address || ''}&keyword=${keyword || ''}&searchType=${postType || ''}`);
 
                 const criteria = new URLSearchParams(window.location.search).get('criteria');
                 localStorage.setItem('searchCriteria', criteria);
+                const searchKeyword = new URLSearchParams(window.location.search).get('keyword');
+                localStorage.setItem('searchKeyword', searchKeyword);
+                const searchType = new URLSearchParams(window.location.search).get('searchType');
+                localStorage.setItem('searchType', searchType)
 
             } catch (error) {
                 console.error('Error during search:', error);
@@ -100,41 +134,66 @@ function SearchComponent() {
         if (storedAddress) {
             setAddress(storedAddress);
         }
+        const storedKeyword = localStorage.getItem('searchKeyword');
+        if (storedKeyword) {
+            setKeyword(storedKeyword);
+        }
+        const storedSearchType = localStorage.getItem('searchType');
+        if (storedSearchType) {
+            setPostType(storedSearchType);
+        }
         const storedURL = localStorage.getItem('searchCriteria');
         if (storedURL) {
-            navigate(`/search?criteria=${storedURL}`);
+            navigate(`/search?criteria=${storedURL}&keyword=${storedKeyword}&searchType=${storedSearchType}`);
         }
     }, []);
 
     return (
         <div>
-            <PlacesAutocomplete
-                value={address}
-                onChange={(newAddress) => setAddress(newAddress)}
-                onSelect={handleSelect}
-            >
-                {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                    <div>
-                        <input
-                            {...getInputProps({
-                                placeholder: 'Enter an address...',
-                                className: 'location-search-input',
-                            })}
-                        />
-                        <div className="autocomplete-dropdown-container">
-                            {loading && <div>Loading...</div>}
-                            {suggestions.map((suggestion) => (
-                                <div
-                                    {...getSuggestionItemProps(suggestion)}
-                                    key={suggestion.placeId}
-                                >
-                                    {suggestion.description}
-                                </div>
-                            ))}
+            <div>
+                <PlacesAutocomplete
+                    value={address}
+                    onChange={(newAddress) => setAddress(newAddress)}
+                    onSelect={handleSelect}
+                >
+                    {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                        <div>
+                            <input
+                                {...getInputProps({
+                                    placeholder: 'Enter an address...',
+                                    className: 'location-search-input',
+                                })}
+                            />
+                            <div className="autocomplete-dropdown-container">
+                                {loading && <div>Loading...</div>}
+                                {suggestions.map((suggestion) => (
+                                    <div
+                                        {...getSuggestionItemProps(suggestion)}
+                                        key={suggestion.placeId}
+                                    >
+                                        {suggestion.description}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
-            </PlacesAutocomplete>
+                    )}
+                </PlacesAutocomplete>
+                <input
+                    type="text"
+                    placeholder="Search By Keyword"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                />
+                <select
+                    value={postType}
+                    onChange={(e) => handleSelectPostType(e.target.value)}
+                >
+                    <option value="" disabled>Search For ...</option>
+                    <option value="Service">Service</option>
+                    <option value="Favor">Favor</option>
+                </select>
+
+            </div>
             <button className= "btn btn-primary" onClick={handleGoToSearchResults} disabled={!address}>
                 Go to Search Results
             </button>
@@ -146,7 +205,7 @@ function SearchComponent() {
                             <li key={post.name} className="list-group-item">
                                 <h3>{post.name}</h3>
                                 <p>{post.description}</p>
-                                <p>Distance: {post.distance} meters</p>
+                                <p>Distance: {post.distance} miles</p>
                                 <button className="btn btn-warning" onClick={() =>
                                     navigate(`/details/${post.name}`)}>View Details
                                 </button>
@@ -154,6 +213,9 @@ function SearchComponent() {
                         ))}
                     </ul>
                 </div>
+            )}
+            {sortedPosts.length === 0 && (
+                <p>0 results found, please try again.</p>
             )}
         </div>
     );
