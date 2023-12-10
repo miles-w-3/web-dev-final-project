@@ -31,6 +31,19 @@ export class PostsController extends Controller {
     return 200;
   }
 
+  @Get('service/{serviceId}')
+  @Middlewares(ensureToken)
+  public async getService(serviceId: string) {
+    try {
+      const serializedService = (await FirebaseUsage.db.collection('services').doc(serviceId).get()).data();
+      return serializedService;
+    } catch(err){
+      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(serviceId)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
   @Post('favor')
   @Middlewares(ensureToken)
   public async addNewFavor(@Body() postInfo: SerializedFavor) {
@@ -47,9 +60,12 @@ export class PostsController extends Controller {
     return 200;
   }
 
+
+
   @Get('user')
   @Middlewares(ensureToken)
-  public async getPostsFor(@Request() req: express.Request) {
+  // the type of post will be inferred by the type of user
+  public async getPostsForUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
   }
 }

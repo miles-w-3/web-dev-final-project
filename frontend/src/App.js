@@ -21,6 +21,7 @@ function App() {
                             <Route path='/auth' element={<UserAuth />} />
                             <Route path='/profile' element={<UserProfile />} />
                             <Route path='/profile/:uid' element={<UserProfile />} />
+                            <Route path='/service/:serviceId' element={<Service />} />
                             <Route path='/*' element={<div>Placeholder for homepage</div>} />
                         </Routes>
                     </div>
