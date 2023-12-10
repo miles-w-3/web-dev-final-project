@@ -1,4 +1,4 @@
-export type UserType = 'finder' | 'asker';
+export type UserType = 'requestor' | 'seller';
 
 export interface UserRegister {
   email: string;

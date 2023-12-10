@@ -16,7 +16,7 @@ function NavItem({ to, name }:{ to: string, name: string}) {
 
 function AccountButton({ authContext }:{ authContext: AuthContextFields}) {
   const text = authContext.user ? "Welcome, " + authContext.user.email : 'Log In / Sign Up';
-  const dest = authContext.user ? '/profile' : '/auth';
+  const dest = authContext.user ? '/profile' : '/login';
 
   return (
     <Button

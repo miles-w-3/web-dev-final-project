@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { AuthProvider } from './state/AuthProvider';
 import UserProfile from './components/profile';
 import { Navigation } from './components/navigation';
+import { ServicePost } from './components/service';
 
 function App() {
     return (
@@ -18,9 +19,10 @@ function App() {
                         <Routes>
                             <Route path='/auto' element={<PlacesAutocompleteComponent />} />
                             <Route path='/search' element={<SearchComponent />} />
-                            <Route path='/auth' element={<UserAuth />} />
+                            <Route path='/login' element={<UserAuth />} />
                             <Route path='/profile' element={<UserProfile />} />
                             <Route path='/profile/:uid' element={<UserProfile />} />
+                            <Route path='/service/:serviceId' element={<ServicePost />} />
                             <Route path='/*' element={<div>Placeholder for homepage</div>} />
                         </Routes>
                     </div>
