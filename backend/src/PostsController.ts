@@ -85,6 +85,22 @@ export class PostsController extends Controller {
     return 200;
   }
 
+  @Put('favor/{favorId}')
+  @Middlewares(ensureToken)
+  public async acceptFavor(favorId: string, @Request() req: express.Request) {
+    const myUID = req.params.loggedInUid;
+    try {
+      await FirebaseUsage.db.collection('favors').doc(favorId).update({ acceptedBy: myUID });
+      const userInfo = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
+      if (!userInfo) throw new Error("Didn't get result");
+      return userInfo;
+    } catch (err) {
+      console.error(`Failed to get service ${favorId}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
   @Get('user')
   @Middlewares(ensureToken)
   // the type of post will be inferred by the type of user

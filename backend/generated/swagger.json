@@ -325,6 +325,32 @@
 				}
 			}
 		},
+		"/posts/favor/{favorId}": {
+			"put": {
+				"operationId": "AcceptFavor",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "favorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/posts/user": {
 			"get": {
 				"operationId": "GetPostsForUser",
