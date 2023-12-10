@@ -1,7 +1,8 @@
-import { Post as PostInfo } from '../../shared/types/posts'
-import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags, Delete, Middlewares } from "tsoa";
+import { SerializedFavor, SerializedService } from '../../shared/types/posts'
+import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares, Put } from "tsoa";
 import FirebaseUsage from './firebase'
 import { ensureToken } from "./Middleware";
+import express from 'express';
 
 
 @Route('posts')
@@ -15,17 +16,80 @@ export class PostsController extends Controller {
     return 200
   }
 
-  @Post()
+  @Post('service')
   @Middlewares(ensureToken)
-  public async addNewPost(@Body() postInfo: any) {
+  public async addNewService(@Body() postInfo: SerializedService) {
     console.log(`Adding post: ${JSON.stringify(postInfo)}`);
-    // TODO: MAke postinfo type work
-    const toFirebase = { ...postInfo, datePosted: postInfo.datePosted, dateNeeded: postInfo.dateNeeded }
-    // TODO: Add check that postedBy is the same as the token holder
-    await FirebaseUsage.db.collection('posts').add(toFirebase)
-    // TODO: return something different on error
+    const toFirebase = { ...postInfo, datePosted: postInfo.datePosted }
+    try {
+      await FirebaseUsage.db.collection('services').add(toFirebase)
+    }
+    catch (err) {
+      console.error(`Failed to save service post: ${JSON.stringify(err)}`);
+      return 500;
+    }
     return 200;
   }
 
+  @Get('service/{serviceId}')
+  @Middlewares(ensureToken)
+  public async getService(serviceId: string) {
+    try {
+      const result = (await FirebaseUsage.db.collection('services').doc(serviceId).get()).data();
+      if (!result) throw new Error("Didn't get result");
+      const sService = result as SerializedService;
+      const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.postedBy).get()).data()?.name ?? 'Unknown Poster'
+      sService.postedByName = postedByName;
+      // fill in purchased by name as well
+      if (sService.purchasedBy) {
+        const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer'
+        sService.purchasedByName = postedByName;
+      }
+      return sService;
+    } catch(err){
+      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
+  @Put('service/{serviceId}')
+  @Middlewares(ensureToken)
+  public async purchaseService(serviceId: string, @Request() req: express.Request) {
+    const myUID = req.params.loggedInUid;
+    try {
+      await FirebaseUsage.db.collection('services').doc(serviceId).update({purchasedBy: myUID});
+      const userInfo = (await FirebaseUsage.db.collection('users').doc(myUID).get()).data();
+      if (!userInfo) throw new Error("Didn't get result");
+      return userInfo;
+    } catch (err) {
+      console.error(`Failed to get service ${serviceId}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+    }
+    return {}
+  }
+
+  @Post('favor')
+  @Middlewares(ensureToken)
+  public async addNewFavor(@Body() postInfo: SerializedFavor) {
+    console.log(`Adding post: ${JSON.stringify(postInfo)}`);
+
+    const toFirebase = { ...postInfo, datePosted: postInfo.datePosted, dateNeeded: postInfo.dateNeeded }
+    try {
+      await FirebaseUsage.db.collection('favors').add(toFirebase)
+    }
+    catch (err) {
+      console.error(`Failed to save service post: ${JSON.stringify(err)}`);
+      return 500;
+    }
+    return 200;
+  }
+
+  @Get('user')
+  @Middlewares(ensureToken)
+  // the type of post will be inferred by the type of user
+  public async getPostsForUser(@Request() req: express.Request) {
+    const uid = req.params.loggedInUid;
+  }
 
 }

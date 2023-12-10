@@ -35,11 +35,10 @@ export default function UserAuth() {
   const userContext = useAuthContext();
 
   // sign up state fields
-  const [userType, setUserType] = useState<UserType>('finder');
+  const [userType, setUserType] = useState<UserType>('requestor');
   const [name, setName] = useState('');
   const [authorized, setAuthorized] = useState(userContext.user != null);
   const toast = useToast();
-
 
 
   async function handleSubmit() {
@@ -162,8 +161,8 @@ export default function UserAuth() {
                 {signingUp && <RadioGroup onChange={ (val) => setUserType(val as UserType)} value={userType}>
                   User Type:
                   <Stack direction='row'>
-                    <Radio value='finder'>Finder</Radio>
-                    <Radio value='asker'>Asker</Radio>
+                    <Radio value='requestor'>Requestor</Radio>
+                    <Radio value='seller'>Seller</Radio>
                   </Stack>
                 </RadioGroup>}
 

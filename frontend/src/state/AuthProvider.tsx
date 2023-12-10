@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     console.log(`COMPLETED LOGIN`)
 
   }
-  // TODO: need to do the same thing i've done for login
+
   async function signUp(email: string, password: string, userType: UserType, name: string) {
     const signedInUser = await createUserWithEmailAndPassword(auth, email, password);
     const idToken = await signedInUser.user.getIdToken();
