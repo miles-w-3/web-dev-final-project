@@ -1,31 +1,33 @@
+import { Box, Text, Link } from '@chakra-ui/react';
 import React from 'react';
-import { Link } from 'react-router-dom';
 const PostSummary = ({sortedPosts, postType }) => {
     if (!sortedPosts) {
         return <></>;
     }
 
-
-
-
     return (
-        <div>
-            <h2>Search Results:</h2>
-            <ul className="list-group">
-                {sortedPosts.map((post) => (
-                    <li key={post.id} className="list-group-item">
-                        <h3>{post.name}</h3>
-                        <p>{post.description}</p>
-                        <p>Distance: {post.distance} miles</p>
+        <div className='d-flex flex-wrap'>
+            {sortedPosts.map((post) => (
+                <Box
+                    key={post.id}
+                    className='card m-2'
+                    style={{ width: '16rem' }}
+                >
+                    <Box p={4}>
+                        <Text fontSize='xl' fontWeight='bold' mb={2}>
+                            {post.name}
+                        </Text>
+                        <Text mb={2}>{post.description}</Text>
+                        {post.distance != null && <Text>Distance: {post.distance} miles</Text>}
                         <button
                             className="btn btn-warning">
-                            <Link to= {`/${postType}/${post.id}`} color='white'>
+                            <Link href={`/${postType}/${post.id}`} color='black'>
                                 View Details
                             </Link>
                         </button>
-                    </li>
-                ))}
-            </ul>
+                    </Box>
+                </Box>
+            ))}
         </div>
     );
 };
