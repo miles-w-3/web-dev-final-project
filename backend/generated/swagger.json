@@ -112,6 +112,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"FavoriteQueryResult": {
+				"properties": {
+					"found": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"found"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserType": {
 				"type": "string",
 				"enum": [
@@ -444,6 +456,91 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/posts/favorite/{postId}": {
+			"get": {
+				"operationId": "CheckFavoritedPost",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FavoriteQueryResult"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AddFavorite",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										200,
+										500
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteFavorite",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/users": {

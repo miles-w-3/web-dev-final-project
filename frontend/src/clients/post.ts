@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { Favor, Posts, SerializedService, Service } from "../../../shared/types/posts";
-=======
-import { Favor, FavoriteQueryResult, SerializedService, Service } from "../../../shared/types/posts";
->>>>>>> 8a602d2 (Working favorite/unfavorite for both post types)
+import { Favor, Posts, FavoriteQueryResult, SerializedService, Service } from "../../../shared/types/posts";
 import { UserDetails } from "../../../shared/types/users";
 import webClient from "./base";
 
