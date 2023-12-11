@@ -1,8 +1,10 @@
-import { SerializedFavor, SerializedService, Posts } from '../../shared/types/posts'
+import { SerializedFavor, SerializedService, Posts, FavoriteQueryResult, Favorite } from '../../shared/types/posts'
 import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares, Put } from "tsoa";
 import FirebaseUsage from './firebase'
 import { ensureToken } from "./Middleware";
 import express from 'express';
+import { UserDetails } from '../../shared/types/users';
+
 
 
 @Route('posts')
@@ -61,6 +63,7 @@ export class PostsController extends Controller {
     }
     return {}
   }
+
 
   @Get('favor/{favorId}')
   @Middlewares(ensureToken)
@@ -148,8 +151,7 @@ export class PostsController extends Controller {
 
   @Get('user')
   @Middlewares(ensureToken)
-  // the type of post will be inferred by the type of user
-  public async getPostsForUser(@Request() req: express.Request) {
+  public async getPostsByUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
     try {
       const userPosts: Posts = { services: [], favors: [] };
@@ -203,5 +205,67 @@ export class PostsController extends Controller {
       this.setStatus(404);
       return {};
     }
+
+  }
+
+  // see if the requesting user has favorited the given post
+  @Get('favorite/{postId}')
+  @Middlewares(ensureToken)
+  public async checkFavoritedPost(postId: string, @Request() req: express.Request) {
+    const result: FavoriteQueryResult = {found: false};
+    const userId = req.params.loggedInUid;
+    const ref = FirebaseUsage.db.collection('favorites');
+    const favoriteQuery = ref.where('userId', '==', userId).where('postId', '==', postId);
+    try {
+      const snapshot = await favoriteQuery.get();
+      if (!snapshot.empty) {
+        result.found = true;
+      }
+    } catch {
+      result.found = false;
+    }
+    return result;
+  }
+
+
+  @Post('favorite/{postId}')
+  @Middlewares(ensureToken)
+  public async addFavorite(postId: string, @Request() req: express.Request) {
+    const userId = req.params.loggedInUid;
+    try {
+      const ref = FirebaseUsage.db.collection('favorites');
+      const favoriteQuery = ref.where('userId', '==', userId).where('postId', '==', postId);
+
+      if (!(await favoriteQuery.get()).empty) {
+        console.log(`Favorite already exists!`)
+        return 200;
+      } else {
+        // if the query doesn't exist, then we can create it
+        const favoriteData: Favorite = {
+          postId, userId,
+        }
+        await ref.add(favoriteData);
+        console.log(`Added favorite! ${JSON.stringify(favoriteData)}`);
+        return 200;
+      }
+    } catch {
+      return 500;
+    }
+  }
+
+  @Delete('favorite/{postId}')
+  @Middlewares(ensureToken)
+  public async deleteFavorite(postId: string, @Request() req: express.Request) {
+    const userId = req.params.loggedInUid;
+    try {
+      const ref = FirebaseUsage.db.collection('favorites');
+      const favorite = ref.where('userId', '==', userId).where('postId', '==', postId);
+      const snapshot = await favorite.get();
+      if (snapshot.empty) return 200; // already isn't there
+      await snapshot.docs[0].ref.delete();
+    } catch (err){
+      console.error(`Failed while trying to delete document: ${JSON.stringify(err)}`);
+    }
+    return 200;
   }
 }
