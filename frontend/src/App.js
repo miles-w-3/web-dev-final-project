@@ -10,6 +10,9 @@ import { Navigation } from './components/navigation';
 import { ServicePost } from './components/service';
 import { FavorPost } from './components/favor';
 import MyPostsComponent from './components/posts';
+import Home from './components/home';
+import "bootstrap/dist/css/bootstrap.min.css";
+
 
 function App() {
     const storedURL = localStorage.getItem('searchCriteria');
@@ -27,7 +30,7 @@ function App() {
                             <Route path='/service/:serviceId' element={<ServicePost />} />
                             <Route path='/favor/:favorId' element={<FavorPost />} />
                             <Route path='/posts' element={<MyPostsComponent />} />
-                            <Route path='/*' element={<div>Placeholder for homepage</div>} />
+                            <Route path='/*' element={<Home />} />
                         </Routes>
                     </div>
                 </ChakraProvider>
