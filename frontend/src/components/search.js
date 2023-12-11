@@ -58,9 +58,11 @@ function SearchComponent() {
 
   const handleUpdateParams = () => {
     setSearchParams({ searchType: postType, searchKeyword: keyword ?? '', searchAddress: address });
+    handleGoToSearchResults();
   }
 
   const handleGoToSearchResults = useCallback(async () => {
+    console.log(`Running handleGoto`)
     if (address) {
       try {
         let updatedPosts;
@@ -71,13 +73,9 @@ function SearchComponent() {
         }
         else if (postType === "favor") {
           updatedPosts = [...posts.favors];
-          console.log(`updatedFavors is now`, JSON.stringify(updatedPosts))
         } else {
           updatedPosts = [...posts.services];
-          console.log(`updatedServices is now`, JSON.stringify(updatedPosts))
         }
-
-        console.log(JSON.stringify(updatedPosts));
 
         if (keyword) {
           updatedPosts = updatedPosts.filter(
@@ -89,15 +87,12 @@ function SearchComponent() {
         const results = await geocodeByAddress(address);
         const selectedLatLng = await getLatLng(results[0]);
 
-        console.log(`Before1`, JSON.stringify(updatedPosts));
-
         updatedPosts = await Promise.all(
           updatedPosts.map(async (post) => {
             const distance = await calculateDistance(
               selectedLatLng,
               post.location
             );
-            console.log(`Distance`, distance);
             return { ...post, distance };
           })
         );
@@ -127,23 +122,19 @@ function SearchComponent() {
 
   // update search params when url changes
   useEffect(() => {
-    const address = searchParams.get('searchAddress');
-    if (address) {
-      setAddress(address);
+    console.log(`SearchParams is now ${JSON.stringify(searchParams)}`);
+    const searchAddress = searchParams.get('searchAddress');
+    if (searchAddress) {
+      setAddress(searchAddress);
     }
-    const keyword = searchParams.get('searchKeyword')
-    if (keyword) setKeyword(keyword);
+    const searchKeyword = searchParams.get('searchKeyword')
+    if (searchKeyword) setKeyword(searchKeyword);
 
-    const storedSearchType = searchParams.get('searchType');
-    if (storedSearchType) {
-      setPostType(storedSearchType);
+    const searchType = searchParams.get('searchType');
+    if (searchType) {
+      setPostType(searchType);
     }
-
-    if (address) {
-      handleGoToSearchResults();
-    }
-  }, [searchParams, handleGoToSearchResults]);
-
+  }, [searchParams, sortedPosts]);
 
   return (
     <>
@@ -236,29 +227,7 @@ function SearchComponent() {
         {sortedPosts.length > 0 && (
           <div>
             <h3 className='fw-light m-4'>Search Results:</h3>
-            <div className='d-flex flex-wrap'>
-              {sortedPosts.map((post) => (
-                <Box
-                  key={post.name}
-                  className='card m-2'
-                  style={{ width: '16rem' }}
-                >
-                  <Box p={4}>
-                    <Text fontSize='xl' fontWeight='bold' mb={2}>
-                      {post.name}
-                    </Text>
-                    <Text mb={2}>{post.description}</Text>
-                    <Text>Distance: {post.distance} miles</Text>
-                    <button
-                      className='btn btn-warning'
-                      onClick={() => navigate(`/details/${post.name}`)}
-                    >
-                      View Details
-                    </button>
-                  </Box>
-                </Box>
-              ))}
-            </div>
+            <PostSummary postType={postType} sortedPosts={sortedPosts}/>
           </div>
         )}
         {sortedPosts.length === 0 && <p>0 results found, please try again.</p>}
