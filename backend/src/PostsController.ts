@@ -1,4 +1,4 @@
-import { SerializedFavor, SerializedService } from '../../shared/types/posts'
+import { SerializedFavor, SerializedService, Posts } from '../../shared/types/posts'
 import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares, Put } from "tsoa";
 import FirebaseUsage from './firebase'
 import { ensureToken } from "./Middleware";
@@ -7,14 +7,6 @@ import express from 'express';
 
 @Route('posts')
 export class PostsController extends Controller {
-
-  @Get()
-  @Middlewares(ensureToken)
-  public async allPosts() {
-    const firstDoc = (await FirebaseUsage.db.collection('Posts').listDocuments())[0].id;
-    console.log(`DOC is ${JSON.stringify(firstDoc)}`);
-    return 200
-  }
 
   @Post('service')
   @Middlewares(ensureToken)
@@ -92,6 +84,34 @@ export class PostsController extends Controller {
     return {}
   }
 
+  @Get()
+  @Middlewares(ensureToken)
+  public async getAllData() {
+    try {
+      const allPosts: Posts = {services:[], favors:[]};
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        allPosts.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        allPosts.favors.push(sFavor);
+      });
+
+      return allPosts;
+    } catch (err) {
+      console.error(`Failed to get all posts: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
+  }
+
   @Post('favor')
   @Middlewares(ensureToken)
   public async addNewFavor(@Body() postInfo: SerializedFavor) {
@@ -131,6 +151,57 @@ export class PostsController extends Controller {
   // the type of post will be inferred by the type of user
   public async getPostsForUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
+    try {
+      const userPosts: Posts = { services: [], favors: [] };
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').where('postedBy', '==', uid).get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        userPosts.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').where('postedBy', '==', uid).get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        userPosts.favors.push(sFavor);
+      });
+
+      return userPosts;
+    } catch (err) {
+      console.error(`Failed to get posts for user ${uid}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
   }
 
+  @Get('user/accept')
+  @Middlewares(ensureToken)
+  public async getAcceptedPurchase(@Request() req: express.Request) {
+    const uid = req.params.loggedInUid;
+    try {
+      const userPosts: Posts = { services: [], favors: [] };
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').where('purchasedBy', '==', uid).get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        userPosts.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').where('acceptedBy', '==', uid).get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        userPosts.favors.push(sFavor);
+      });
+
+      return userPosts;
+    } catch (err) {
+      console.error(`Failed to get posts for user ${uid}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
+  }
 }

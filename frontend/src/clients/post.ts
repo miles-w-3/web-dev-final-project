@@ -1,4 +1,4 @@
-import { Favor, SerializedService, Service } from "../../../shared/types/posts";
+import { Favor, Posts, SerializedService, Service } from "../../../shared/types/posts";
 import { UserDetails } from "../../../shared/types/users";
 import webClient from "./base";
 
@@ -44,3 +44,37 @@ export async function acceptFavor(favorId: string) {
   console.log(`UserInfo is ${userInfo}`);
   return userInfo.data;
 }
+
+export async function getAllData(){
+  const result = (await webClient.get(POSTS_URL)).data;
+  if(!result) {
+    return undefined;
+  }
+  const allPosts = result as Posts;
+  console.log(JSON.stringify(allPosts))
+  return allPosts;
+}
+
+export async function getPostsByUser() {
+  const result = (await webClient.get(`${POSTS_URL}/user`)).data;
+  if(!result) {
+    return undefined;
+  }
+  const allPosts = result as Posts;
+  console.log(JSON.stringify(allPosts))
+  return allPosts;
+}
+
+export async function getAcceptedPurchase() {
+  const result = (await webClient.get(`${POSTS_URL}/user/accept`)).data;
+  if(!result) {
+    return undefined;
+  }
+  const allPosts = result as Posts;
+  console.log(JSON.stringify(allPosts))
+  return allPosts;
+}
+
+
+
+

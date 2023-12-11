@@ -33,7 +33,7 @@ export function Navigation({ searchCriteria }: { searchCriteria: string }) {
   const authContext = useAuthContext();
   const location = useLocation();
   const options: Record<string, string> = {
-    'Home': '/', 'Posts': '/posts', 'Users': '/users',
+    'Home': '/', 'My Posts': '/posts', 'Users': '/users',
     'Location Search': `/search?criteria=${searchCriteria}`
   };
   return (

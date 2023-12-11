@@ -16,6 +16,7 @@ export default function UserProfile() {
   const [userDetails, setUserDetails] = useState<UserDetails>({ uid: '', email: '', name: '', userType: 'requestor'});
   const [currentUser, setCurrentUser] = useState<string | undefined>(userContext.user?.uid);
   const [showingCreatePost, setShowingCreatePost] = useState<boolean>(false);
+  const [userPosts, setUserPosts] = useState([]);
   let { profile } = useParams();
   console.log(`Profile is ${JSON.stringify(profile)}`);
 
@@ -27,7 +28,14 @@ export default function UserProfile() {
       console.log(`About to get user details for ${uid}`);
       const result = await getUserDetails(uid);
       console.log(`in hud, Got user details ${JSON.stringify(result)}`)
-      if (result && result.data) setUserDetails(result.data);
+      if (result && result.data){
+        setUserDetails(result.data);
+        // const postsResult = await getPostsForUser(uid);
+        // console.log(`User posts: ${JSON.stringify(postsResult)}`);
+        // if (postsResult && postsResult.data) {
+        //   setUserPosts(postsResult.data);
+        // }
+      }
     }
     // leave this page if we are logged in
 
