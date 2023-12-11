@@ -27,6 +27,7 @@ const models: TsoaRoute.Models = {
             "postedBy": {"dataType":"string","required":true},
             "price": {"dataType":"double","required":true},
             "purchasedBy": {"dataType":"string"},
+            "id": {"dataType":"string"},
             "postedByName": {"dataType":"string"},
             "purchasedByName": {"dataType":"string"},
         },
@@ -43,6 +44,7 @@ const models: TsoaRoute.Models = {
             "dateNeeded": {"dataType":"string","required":true},
             "postedBy": {"dataType":"string","required":true},
             "acceptedBy": {"dataType":"string"},
+            "id": {"dataType":"string"},
             "postedByName": {"dataType":"string"},
             "acceptedByName": {"dataType":"string"},
         },
@@ -95,30 +97,6 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/posts',
-            ...(fetchMiddlewares<RequestHandler>(PostsController)),
-            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.allPosts)),
-
-            function PostsController_allPosts(request: any, response: any, next: any) {
-            const args = {
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const controller = new PostsController();
-
-
-              const promise = controller.allPosts.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/posts/service',
             ...(fetchMiddlewares<RequestHandler>(PostsController)),
             ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.addNewService)),
@@ -220,7 +198,7 @@ export function RegisterRoutes(app: express.Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/posts/posts',
+        app.get('/posts',
             ...(fetchMiddlewares<RequestHandler>(PostsController)),
             ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getAllData)),
 

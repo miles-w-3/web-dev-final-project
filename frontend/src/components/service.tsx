@@ -63,7 +63,6 @@ export function ServicePost() {
           <Box>
             <Text>{currentService.description}</Text>
             <Text>Posted at {currentService.datePosted.toString()}</Text>
-            <Text>${currentService.price}</Text>
             <Text>
               Posted by: <Link color='green.600' href={`/profile/${currentService.postedBy}`}>{currentService.postedByName}</Link>
             </Text>

@@ -1,7 +1,7 @@
 /* global google */
 import React, {useEffect, useState} from 'react';
-import webClient from "../clients/base";
-import { useNavigate } from 'react-router-dom';
+import { getAllData } from "../clients/post";
+import { useNavigate, Link } from 'react-router-dom';
 import PlacesAutocomplete, {
     geocodeByAddress,
     getLatLng,
@@ -10,9 +10,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function SearchComponent() {
     const [address, setAddress] = useState('');
     const [keyword, setKeyword] = useState('');
-    const [postType, setPostType] = useState(null);
-    const [posts, setPosts] = useState([]);
-    const [favors, setFavors] = useState([]);
+    const [postType, setPostType] = useState("service");
+    const [posts, setPosts] = useState(undefined);
     const [sortedPosts, setSortedPosts] = useState([]);
     const navigate = useNavigate();
     const handleSelect = async (selectedAddress) => {
@@ -47,45 +46,61 @@ function SearchComponent() {
     const handleSelectPostType = async (selectPostType) => {
         console.log(selectPostType);
         setPostType(selectPostType);
+
         localStorage.setItem('postType', selectPostType)
     }
 
     const handleGoToSearchResults = async () => {
+
         if (address) {
             try {
-                const results = await geocodeByAddress(address);
-                const selectedLatLng = await getLatLng(results[0]);
+                let updatedPosts;
 
-                const updatedPosts = await Promise.all(
-                    posts.map(async (post) => {
-                        const distance = await calculateDistance(
-                            selectedLatLng,
-                            post.location
-                        );
-                        return { ...post, distance };
-                    })
-                );
+                console.log(`handleResults`, postType);
+                if (posts === undefined) {
+                    updatedPosts = [];
+                }
+                else if (postType === "favor") {
+                    updatedPosts = [...posts.favors];
+                    console.log(`updatedFavors is now`, JSON.stringify(updatedPosts))
+                } else {
+                    updatedPosts = [...posts.services];
+                    console.log(`updatedServices is now`, JSON.stringify(updatedPosts))
+                }
 
-                let sortedPosts = updatedPosts.sort((a, b) => a.distance - b.distance);
-
-                sortedPosts = sortedPosts.filter((post) => {
-                    if (postType === 'Service') {
-                        return 'price' in post;
-                    } else if (postType === 'Favor') {
-                        return 'dateNeeded' in post;
-                    }
-                    return true;
-                });
+                console.log(JSON.stringify(updatedPosts));
 
                 if(keyword) {
-                    sortedPosts = sortedPosts.filter (
+                    updatedPosts = updatedPosts.filter (
                         (post) =>
                             post.name.toLowerCase().includes(keyword.toLowerCase())
                     )
                 }
 
-                setSortedPosts(sortedPosts);
-                localStorage.setItem('searchResults', JSON.stringify(sortedPosts));
+                const results = await geocodeByAddress(address);
+                const selectedLatLng = await getLatLng(results[0]);
+
+                console.log(`Before1`, JSON.stringify(updatedPosts));
+
+                updatedPosts = await Promise.all(
+                    updatedPosts.map(async (post) => {
+                        const distance = await calculateDistance(
+                            selectedLatLng,
+                            post.location
+                        );
+                        console.log(`Distance`, distance);
+                        return { ...post, distance };
+                    })
+                );
+
+
+
+                console.log(`Before`, JSON.stringify(updatedPosts));
+                updatedPosts.sort((a, b) => a.distance - b.distance);
+                console.log(`After`, JSON.stringify(updatedPosts));
+
+                setSortedPosts(updatedPosts);
+                localStorage.setItem('searchResults', JSON.stringify(updatedPosts));
 
                 navigate(`/search?criteria=${address || ''}&keyword=${keyword || ''}&searchType=${postType || ''}`);
 
@@ -126,9 +141,8 @@ function SearchComponent() {
         }
         const fetchPosts = async () => {
             try {
-                const response = await webClient.get('/posts/posts');
-                const fetchedPosts = response.data;
-                setPosts(fetchedPosts);
+                const response = await getAllData();
+                setPosts(response);
             } catch (error) {
                 console.error('Error fetching posts:', error);
             }
@@ -177,9 +191,8 @@ function SearchComponent() {
                     value={postType}
                     onChange={(e) => handleSelectPostType(e.target.value)}
                 >
-                    <option value="" disabled>Search For ...</option>
-                    <option value="Service">Service</option>
-                    <option value="Favor">Favor</option>
+                    <option value="service">Service</option>
+                    <option value="favor">Favor</option>
                 </select>
 
             </div>
@@ -191,12 +204,12 @@ function SearchComponent() {
                     <h2>Search Results:</h2>
                     <ul className="list-group">
                         {sortedPosts.map((post) => (
-                            <li key={post.name} className="list-group-item">
+                            <li key={post.id} className="list-group-item">
                                 <h3>{post.name}</h3>
                                 <p>{post.description}</p>
                                 <p>Distance: {post.distance} miles</p>
                                 <button className="btn btn-warning" onClick={() =>
-                                    navigate(`/details/${post.name}`)}>View Details
+                                    navigate(`/${postType}/${post.id}`)}>View Details
                                 </button>
                             </li>
                         ))}
@@ -204,7 +217,7 @@ function SearchComponent() {
                 </div>
             )}
             {sortedPosts.length === 0 && (
-                <p>0 results found, please try again.</p>
+                <p>No results found, please try again.</p>
             )}
         </div>
     );

@@ -1,4 +1,4 @@
-import { SerializedFavor, SerializedService } from '../../shared/types/posts'
+import { SerializedFavor, SerializedService, Posts } from '../../shared/types/posts'
 import { Body, Controller, Get, Path, Post, Query, Request, Route, Tags, Delete, Middlewares, Put } from "tsoa";
 import FirebaseUsage from './firebase'
 import { ensureToken } from "./Middleware";
@@ -7,14 +7,6 @@ import express from 'express';
 
 @Route('posts')
 export class PostsController extends Controller {
-
-  @Get()
-  @Middlewares(ensureToken)
-  public async allPosts() {
-    const firstDoc = (await FirebaseUsage.db.collection('Posts').listDocuments())[0].id;
-    console.log(`DOC is ${JSON.stringify(firstDoc)}`);
-    return 200
-  }
 
   @Post('service')
   @Middlewares(ensureToken)
@@ -92,38 +84,24 @@ export class PostsController extends Controller {
     return {}
   }
 
-  @Get('posts')
+  @Get()
   @Middlewares(ensureToken)
   public async getAllData() {
     try {
-      const allPosts: any[] = [];
+      const allPosts: Posts = {services:[], favors:[]};
 
       const servicesSnapshot = await FirebaseUsage.db.collection('services').get();
-      servicesSnapshot.forEach(async (doc) => {
+      servicesSnapshot.forEach((doc) => {
         const sService = doc.data() as SerializedService;
-        const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.postedBy).get()).data()?.name ?? 'Unknown Poster';
-        sService.postedByName = postedByName;
-
-        if (sService.purchasedBy) {
-          const purchasedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer';
-          sService.purchasedByName = purchasedByName;
-        }
-
-        allPosts.push(sService);
+        sService.id = doc.id;
+        allPosts.services.push(sService);
       });
 
       const favorsSnapshot = await FirebaseUsage.db.collection('favors').get();
-      favorsSnapshot.forEach(async (doc) => {
+      favorsSnapshot.forEach((doc) => {
         const sFavor = doc.data() as SerializedFavor;
-        const postedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.postedBy).get()).data()?.name ?? 'Unknown Poster';
-        sFavor.postedByName = postedByName;
-
-        if (sFavor.acceptedBy) {
-          const acceptedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.acceptedBy).get()).data()?.name ?? 'Unknown Acceptor';
-          sFavor.acceptedByName = acceptedByName;
-        }
-
-        allPosts.push(sFavor);
+        sFavor.id = doc.id;
+        allPosts.favors.push(sFavor);
       });
 
       return allPosts;

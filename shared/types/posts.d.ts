@@ -12,6 +12,7 @@ export interface Service {
   postedBy: string;
   price: number;
   purchasedBy?: string;
+  id?: string;
   // these fields aren't stored in the DB, they're filled in by the backend to approximate a join
   postedByName?: string;
   purchasedByName?: string;
@@ -29,6 +30,7 @@ export interface Favor {
   dateNeeded: Date;
   postedBy: string;
   acceptedBy?: string;
+  id?: string;
   // these fields aren't stored in the DB, they're filled in by the backend to approximate a join
   postedByName?: string;
   acceptedByName?: string;
@@ -37,4 +39,9 @@ export interface Favor {
 export interface SerializedFavor extends Favor {
   datePosted: string;
   dateNeeded: string;
+}
+
+export interface Posts {
+  favors: SerializedFavor[];
+  services: SerializedService[];
 }
