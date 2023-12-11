@@ -67,6 +67,15 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Posts": {
+        "dataType": "refObject",
+        "properties": {
+            "favors": {"dataType":"array","array":{"dataType":"refObject","ref":"SerializedFavor"},"required":true},
+            "services": {"dataType":"array","array":{"dataType":"refObject","ref":"SerializedService"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserLogin": {
         "dataType": "refObject",
         "properties": {
@@ -275,9 +284,9 @@ export function RegisterRoutes(app: express.Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/posts/user',
             ...(fetchMiddlewares<RequestHandler>(PostsController)),
-            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getPostsForUser)),
+            ...(fetchMiddlewares<RequestHandler>(PostsController.prototype.getPostsByUser)),
 
-            function PostsController_getPostsForUser(request: any, response: any, next: any) {
+            function PostsController_getPostsByUser(request: any, response: any, next: any) {
             const args = {
                     req: {"in":"request","name":"req","required":true,"dataType":"object"},
             };
@@ -291,7 +300,7 @@ export function RegisterRoutes(app: express.Router) {
                 const controller = new PostsController();
 
 
-              const promise = controller.getPostsForUser.apply(controller, validatedArgs as any);
+              const promise = controller.getPostsByUser.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
@@ -420,6 +429,31 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.getProfileByID.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/users/favorites',
+            ...(fetchMiddlewares<RequestHandler>(UsersController)),
+            ...(fetchMiddlewares<RequestHandler>(UsersController.prototype.getUserFavorites)),
+
+            function UsersController_getUserFavorites(request: any, response: any, next: any) {
+            const args = {
+                    req: {"in":"request","name":"req","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new UsersController();
+
+
+              const promise = controller.getUserFavorites.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       // Handle 401 Unauthorized responses
       if (error.response?.status === 401) {
         console.error("Received 401, logging the user out")
+        nav('/login');
         logOut();
       }
     }

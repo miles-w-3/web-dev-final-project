@@ -1,0 +1,55 @@
+{
+  "_query": {
+    "_firestore": {
+      "projectId": "webdevfinal-c9ede"
+    },
+    "_queryOptions": {
+      "parentPath": {
+        "segments": []
+      },
+      "collectionId": "favorites",
+      "converter": {},
+      "allDescendants": false,
+      "filters": [
+        {
+          "serializer": {
+            "allowUndefined": false
+          },
+          "field": {
+            "segments": [
+              "userId"
+            ]
+          },
+          "op": "EQUAL",
+          "value": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1"
+        },
+        {
+          "serializer": {
+            "allowUndefined": false
+          },
+          "field": {
+            "segments": [
+              "postId"
+            ]
+          },
+          "op": "EQUAL",
+          "value": "LMlZ8HRRhVXQTYrU7FGl"
+        }
+      ],
+      "fieldOrders": [],
+      "kindless": false,
+      "requireConsistency": true
+    },
+    "_serializer": {
+      "allowUndefined": false
+    },
+    "_allowUndefined": false
+  },
+  "_readTime": {
+    "_seconds": 1702323746,
+    "_nanoseconds": 414452000
+  },
+  "_size": 1,
+  "_materializedDocs": null,
+  "_materializedChanges": null
+}
