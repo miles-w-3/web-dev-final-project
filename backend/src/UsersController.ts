@@ -3,6 +3,7 @@ import type { UserLogin, UserRegister, UserDetails } from '../../shared/types/us
 import FirebaseUsage from "./firebase";
 import express from 'express';
 import { ensureToken } from "./Middleware";
+import { Favorite, Posts, SerializedFavor, SerializedService } from "../../shared/types/posts";
 
 @Route('users')
 export class UsersController extends Controller {
@@ -77,19 +78,41 @@ export class UsersController extends Controller {
 
 
 
-  //@Get('loggedIn')
-  /**
-   * Return the current logged in user info
-   */
-  // public async logIn(@Body() requestBody: string) {
-  //   //const userRecord = await FirebaseUsage.auth
-  //   // TODO: handle login flow as follows https://stackoverflow.com/questions/44899658/how-to-authenticate-an-user-in-firebase-admin-in-nodejs
-  //   /*
-  //   Client will have an auth token. they can notify this backend once of the auth token and the backend
-  //   Can validate it. Then when the client sends requests with a token we compare it with a dict of auth
-  //   tokens to user ids
-  //   */
-  // }
+  @Get('favorites')
+  @Middlewares(ensureToken)
+  public async getUserFavorites(@Request() req: express.Request) {
+    const result: Posts = {services: [], favors: []}
+    const userId = req.params.loggedInUid;
+
+    const ref = FirebaseUsage.db.collection('favorites');
+    const servicesRef = FirebaseUsage.db.collection('services');
+    const favorsRef = FirebaseUsage.db.collection('favors');
+    try {
+      const favoriteQuery = ref.where('userId', '==', userId);
+      const snapshots = await favoriteQuery.get();
+
+      snapshots.forEach(async favoriteDoc => {
+        const data = favoriteDoc.data() as Favorite
+        // first try to get from services
+        try {
+          const doc = await servicesRef.doc(data.postId).get();
+          if (doc.data() != null) result.services.push(doc.data() as SerializedService);
+        } catch {
+          // then try to get from favors
+          try {
+            const doc = await favorsRef.doc(data.postId).get();
+            if (doc.data() != null) result.favors.push(doc.data() as SerializedFavor);
+          } catch {
+            // if we couldn't get in favors, then this favorite shouldn't exist. Delete it
+            await favoriteDoc.ref.delete();
+          }
+        }
+      })
+    } catch {
+      this.setStatus(500);
+    }
+    return result;
+  }
 
   @Post('login')
   @SuccessResponse('200', 'Successfully logged in')

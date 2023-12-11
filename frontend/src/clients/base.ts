@@ -1,5 +1,4 @@
-import axios, { AxiosError } from "axios";
-import { useAuthContext } from "../state/useAuthContext";
+import axios from "axios";
 
 const webClient = axios.create({
   baseURL: process.env.REACT_APP_BACKEND_URL,

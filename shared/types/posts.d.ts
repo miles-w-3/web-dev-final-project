@@ -38,3 +38,17 @@ export interface SerializedFavor extends Favor {
   datePosted: string;
   dateNeeded: string;
 }
+
+export interface Favorite {
+  userId: string;
+  postId: string;
+}
+
+export interface Posts {
+  favors: SerializedFavor[];
+  services: SerializedService[];
+}
+
+export interface FavoriteQueryResult {
+  found: boolean;
+}

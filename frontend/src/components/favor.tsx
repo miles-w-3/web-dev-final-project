@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Favor } from "../../../shared/types/posts";
 import { useParams } from "react-router";
-import { getFavor, acceptFavor } from "../clients/post";
+import { getFavor, acceptFavor, removeFavorite, addFavorite } from "../clients/post";
 import { Box, Button, Divider, Flex, Text, Link, useToast } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 
@@ -9,6 +9,7 @@ export function FavorPost() {
   const { favorId } = useParams();
   const [currentFavor, setCurrentFavor] = useState<Favor | undefined>();
   const authContext = useAuthContext();
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -47,7 +48,24 @@ export function FavorPost() {
   }
 
   const handleFavorite = async () => {
-    // TODO:
+    if (!favorId) return;
+    if (isFavorite) {
+      await removeFavorite(favorId);
+      setIsFavorite(false);
+    } else {
+      // adding a favorite
+      try {
+        await addFavorite(favorId);
+        setIsFavorite(true);
+      } catch {
+        toast({
+          title: 'Failed to add favor to favorites',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    }
   }
 
   return (
@@ -57,11 +75,23 @@ export function FavorPost() {
           <Text fontSize={18} fontWeight='bold'>
             {currentFavor.name}
           </Text>
-          <Text color='gray'>
-            Service Posting
-          </Text>
+          <Flex
+            p={4}
+            align='center'
+            justify='space-between'
+          >
+            <Text color='gray'>
+              Favor Posting
+            </Text>
+            <Button
+              colorScheme={isFavorite ? 'red' : 'yellow'}
+              onClick={handleFavorite}
+            >
+              {isFavorite ? 'Unfavorite' : 'Favorite'}
+            </Button>
+          </Flex>
           <Divider />
-          <Box>
+          <Box p={4}>
             <Text>{currentFavor.description}</Text>
             <Text>Posted at {currentFavor.datePosted.toString()}</Text>
             <Text>Needed by {currentFavor.dateNeeded.toString()}</Text>

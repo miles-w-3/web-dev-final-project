@@ -106,6 +106,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"FavoriteQueryResult": {
+				"properties": {
+					"found": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"found"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"UserType": {
 				"type": "string",
 				"enum": [
@@ -133,6 +145,28 @@
 					"name",
 					"userType",
 					"uid"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Posts": {
+				"properties": {
+					"favors": {
+						"items": {
+							"$ref": "#/components/schemas/SerializedFavor"
+						},
+						"type": "array"
+					},
+					"services": {
+						"items": {
+							"$ref": "#/components/schemas/SerializedService"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"favors",
+					"services"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -380,7 +414,7 @@
 		},
 		"/posts/user": {
 			"get": {
-				"operationId": "GetPostsForUser",
+				"operationId": "GetPostsByUser",
 				"responses": {
 					"204": {
 						"description": "No content"
@@ -388,6 +422,91 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/posts/favorite/{postId}": {
+			"get": {
+				"operationId": "CheckFavoritedPost",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/FavoriteQueryResult"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AddFavorite",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"enum": [
+										200,
+										500
+									]
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteFavorite",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "postId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/users": {
@@ -500,6 +619,25 @@
 				]
 			}
 		},
+		"/users/favorites": {
+			"get": {
+				"operationId": "GetUserFavorites",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Posts"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/users/login": {
 			"post": {
 				"operationId": "Login",
@@ -520,7 +658,6 @@
 						}
 					}
 				},
-				"description": "Return the current logged in user info",
 				"security": [],
 				"parameters": [],
 				"requestBody": {

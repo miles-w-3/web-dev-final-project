@@ -1,4 +1,4 @@
-import { Favor, SerializedService, Service } from "../../../shared/types/posts";
+import { Favor, FavoriteQueryResult, SerializedService, Service } from "../../../shared/types/posts";
 import { UserDetails } from "../../../shared/types/users";
 import webClient from "./base";
 
@@ -43,4 +43,19 @@ export async function acceptFavor(favorId: string) {
   const userInfo = await webClient.put<UserDetails>(`${POSTS_URL}/favor/${favorId}`);
   console.log(`UserInfo is ${userInfo}`);
   return userInfo.data;
+}
+
+export async function getIsFavorite(postId: string) {
+  const result = await webClient.get<FavoriteQueryResult>(`${POSTS_URL}/favorite/${postId}`);
+  console.log(`Favorite result is ${JSON.stringify(result.data)}`);
+  return result.data.found;
+}
+
+export function addFavorite(postId: string) {
+  return webClient.post(`${POSTS_URL}/favorite/${postId}`)
+
+}
+
+export async function removeFavorite(postId: string) {
+  return webClient.delete(`${POSTS_URL}/favorite/${postId}`);
 }

@@ -1,4 +1,4 @@
-import Express from "express";
+import express from "express";
 import session from 'express-session';
 
 import cors from 'cors';
@@ -18,12 +18,12 @@ declare module 'express-session' {
 
 dotenv.config();
 
-const app = Express();
+const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
 }));
-app.use(Express.json());
+app.use(express.json());
 const server = http.createServer(app);
 
 const sessionOptions: session.SessionOptions = {
@@ -43,7 +43,7 @@ app.use(session(sessionOptions));
 RegisterRoutes(app);
 
 // add swagger endpoint
-app.use('/docs', swaggerUi.serve, async (_req: Express.Request, res: Express.Response) => {
+app.use('/docs', swaggerUi.serve, async (_req: express.Request, res: express.Response) => {
   const swaggerSpec = await fs.readFile('generated/swagger.json', 'utf-8');
   return res.send(swaggerUi.generateHTML(JSON.parse(swaggerSpec)));
 });
