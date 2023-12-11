@@ -92,6 +92,48 @@ export class PostsController extends Controller {
     return {}
   }
 
+  @Get('posts')
+  @Middlewares(ensureToken)
+  public async getAllData() {
+    try {
+      const allPosts: any[] = [];
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').get();
+      servicesSnapshot.forEach(async (doc) => {
+        const sService = doc.data() as SerializedService;
+        const postedByName = (await FirebaseUsage.db.collection('users').doc(sService.postedBy).get()).data()?.name ?? 'Unknown Poster';
+        sService.postedByName = postedByName;
+
+        if (sService.purchasedBy) {
+          const purchasedByName = (await FirebaseUsage.db.collection('users').doc(sService.purchasedBy).get()).data()?.name ?? 'Unknown Buyer';
+          sService.purchasedByName = purchasedByName;
+        }
+
+        allPosts.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').get();
+      favorsSnapshot.forEach(async (doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        const postedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.postedBy).get()).data()?.name ?? 'Unknown Poster';
+        sFavor.postedByName = postedByName;
+
+        if (sFavor.acceptedBy) {
+          const acceptedByName = (await FirebaseUsage.db.collection('users').doc(sFavor.acceptedBy).get()).data()?.name ?? 'Unknown Acceptor';
+          sFavor.acceptedByName = acceptedByName;
+        }
+
+        allPosts.push(sFavor);
+      });
+
+      return allPosts;
+    } catch (err) {
+      console.error(`Failed to get all posts: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
+  }
+
   @Post('favor')
   @Middlewares(ensureToken)
   public async addNewFavor(@Body() postInfo: SerializedFavor) {
@@ -131,6 +173,7 @@ export class PostsController extends Controller {
   // the type of post will be inferred by the type of user
   public async getPostsForUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
+
   }
 
 }

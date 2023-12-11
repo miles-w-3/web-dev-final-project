@@ -44,3 +44,12 @@ export async function acceptFavor(favorId: string) {
   console.log(`UserInfo is ${userInfo}`);
   return userInfo.data;
 }
+
+export async function getAllData(){
+  return webClient.get(`${POSTS_URL}/posts`);
+
+}
+
+
+
+

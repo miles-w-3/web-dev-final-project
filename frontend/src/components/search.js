@@ -1,5 +1,6 @@
 /* global google */
 import React, {useEffect, useState} from 'react';
+import webClient from "../clients/base";
 import { useNavigate } from 'react-router-dom';
 import PlacesAutocomplete, {
     geocodeByAddress,
@@ -10,33 +11,10 @@ function SearchComponent() {
     const [address, setAddress] = useState('');
     const [keyword, setKeyword] = useState('');
     const [postType, setPostType] = useState(null);
-    const [posts] = useState([
-        {
-            name: 'Sample Service',
-            description: 'This is a sample service post.',
-            location: { lat: 41.836828, lng: -71.993255 },
-            datePosted: new Date(),
-            postedBy: 'John Doe',
-            price: 20,
-            purchasedBy: '',
-            postedByName: '',
-            purchasedByName: '',
-        },
-        {
-            name: 'Sample Favor',
-            description: 'This is a sample favor post.',
-            location: { lat: 34.0522, lng: -118.2437 },
-            datePosted: new Date(),
-            dateNeeded: new Date(),
-            postedBy: 'Jane Doe',
-            acceptedBy: '',
-            postedByName: '',
-            acceptedByName: '',
-        },
-    ]);
+    const [posts, setPosts] = useState([]);
+    const [favors, setFavors] = useState([]);
     const [sortedPosts, setSortedPosts] = useState([]);
     const navigate = useNavigate();
-
     const handleSelect = async (selectedAddress) => {
         const results = await geocodeByAddress(selectedAddress);
         await getLatLng(results[0]);
@@ -146,6 +124,17 @@ function SearchComponent() {
         if (storedURL) {
             navigate(`/search?criteria=${storedURL}&keyword=${storedKeyword}&searchType=${storedSearchType}`);
         }
+        const fetchPosts = async () => {
+            try {
+                const response = await webClient.get('/posts/posts');
+                const fetchedPosts = response.data;
+                setPosts(fetchedPosts);
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        };
+
+        fetchPosts();
     }, []);
 
     return (

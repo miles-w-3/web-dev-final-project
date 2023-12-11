@@ -345,6 +345,26 @@
 				]
 			}
 		},
+		"/posts/posts": {
+			"get": {
+				"operationId": "GetAllData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {},
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/posts/favor": {
 			"post": {
 				"operationId": "AddNewFavor",
