@@ -7,6 +7,7 @@ import PlacesAutocomplete, {
     getLatLng,
 } from 'react-places-autocomplete';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import PostSummary from './postSummary'
 function SearchComponent() {
     const [address, setAddress] = useState('');
     const [keyword, setKeyword] = useState('');
@@ -46,12 +47,10 @@ function SearchComponent() {
     const handleSelectPostType = async (selectPostType) => {
         console.log(selectPostType);
         setPostType(selectPostType);
-
         localStorage.setItem('postType', selectPostType)
     }
 
     const handleGoToSearchResults = async () => {
-
         if (address) {
             try {
                 let updatedPosts;
@@ -200,25 +199,9 @@ function SearchComponent() {
                 Go to Search Results
             </button>
             {sortedPosts.length > 0 && (
-                <div>
-                    <h2>Search Results:</h2>
-                    <ul className="list-group">
-                        {sortedPosts.map((post) => (
-                            <li key={post.id} className="list-group-item">
-                                <h3>{post.name}</h3>
-                                <p>{post.description}</p>
-                                <p>Distance: {post.distance} miles</p>
-                                <button className="btn btn-warning" onClick={() =>
-                                    navigate(`/${postType}/${post.id}`)}>View Details
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <PostSummary sortedPosts={sortedPosts} postType={postType} />
             )}
-            {sortedPosts.length === 0 && (
-                <p>No results found, please try again.</p>
-            )}
+            {sortedPosts.length === 0 && <p>No results found, please try again.</p>}
         </div>
     );
 }

@@ -151,7 +151,57 @@ export class PostsController extends Controller {
   // the type of post will be inferred by the type of user
   public async getPostsForUser(@Request() req: express.Request) {
     const uid = req.params.loggedInUid;
+    try {
+      const userPosts: Posts = { services: [], favors: [] };
 
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').where('postedBy', '==', uid).get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        userPosts.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').where('postedBy', '==', uid).get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        userPosts.favors.push(sFavor);
+      });
+
+      return userPosts;
+    } catch (err) {
+      console.error(`Failed to get posts for user ${uid}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
   }
 
+  @Get('user/accept')
+  @Middlewares(ensureToken)
+  public async getAcceptedPurchase(@Request() req: express.Request) {
+    const uid = req.params.loggedInUid;
+    try {
+      const userPosts: Posts = { services: [], favors: [] };
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').where('purchasedBy', '==', uid).get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        userPosts.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').where('acceptedBy', '==', uid).get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        userPosts.favors.push(sFavor);
+      });
+
+      return userPosts;
+    } catch (err) {
+      console.error(`Failed to get posts for user ${uid}: ${JSON.stringify(err)}`);
+      this.setStatus(404);
+      return {};
+    }
+  }
 }

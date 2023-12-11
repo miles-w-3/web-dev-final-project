@@ -55,6 +55,26 @@ export async function getAllData(){
   return allPosts;
 }
 
+export async function getPostsByUser() {
+  const result = (await webClient.get(`${POSTS_URL}/user`)).data;
+  if(!result) {
+    return undefined;
+  }
+  const allPosts = result as Posts;
+  console.log(JSON.stringify(allPosts))
+  return allPosts;
+}
+
+export async function getAcceptedPurchase() {
+  const result = (await webClient.get(`${POSTS_URL}/user/accept`)).data;
+  if(!result) {
+    return undefined;
+  }
+  const allPosts = result as Posts;
+  console.log(JSON.stringify(allPosts))
+  return allPosts;
+}
+
 
 
 
