@@ -12,6 +12,7 @@ export async function listUsers() {
 export async function getLoggedInUserDetails() {
   const result: UserDetails = (await webClient.get<UserDetails>(`${USERS_URL}/me`)).data;
   console.log(`Got logged in user info ${JSON.stringify(result)}`);
+  return result;
 }
 
 export async function getUserDetails(uid: string) {

@@ -1,8 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+const PostSummary = ({sortedPosts, postType }) => {
+    if (!sortedPosts) {
+        return <></>;
+    }
 
-const PostSummary = ({ sortedPosts, postType }) => {
-    const navigate = useNavigate();
+
+
 
     return (
         <div>
@@ -14,10 +18,10 @@ const PostSummary = ({ sortedPosts, postType }) => {
                         <p>{post.description}</p>
                         <p>Distance: {post.distance} miles</p>
                         <button
-                            className="btn btn-warning"
-                            onClick={() => navigate(`/${postType}/${post.id}`)}
-                        >
-                            View Details
+                            className="btn btn-warning">
+                            <Link to= {`/${postType}/${post.id}`} color='white'>
+                                View Details
+                            </Link>
                         </button>
                     </li>
                 ))}
