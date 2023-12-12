@@ -108,7 +108,7 @@ export function FavorPost() {
               <Divider />
               <Box p={4}>
                 <Flex direction="column">
-                  <Flex justify="space-between" align="center">
+                  <Flex justify="space-between" align="start">
                     <Text fontSize="lg" color="gray">
                       Posted by:{" "}
                       <Link
@@ -118,22 +118,27 @@ export function FavorPost() {
                         {currentFavor.postedByName}
                       </Link>
                     </Text>
-                    {!currentFavor.acceptedBy && (
-                      <Badge colorScheme="green" fontSize="sm">
-                        Available
-                        <Button
-                          ml={2}
-                          hidden={
-                            authContext.user?.uid === currentFavor.postedBy
-                          }
-                          onClick={handleAccept}
+                    {currentFavor.acceptedBy && (
+                      <Badge colorScheme="red" fontSize="sm">
+                        Accepted by:{" "}
+                        <Link
+                          color="green.600"
+                          href={`/profile/${currentFavor.acceptedBy}`}
                         >
-                          Accept
-                        </Button>
+                          {currentFavor.acceptedByName}
+                        </Link>
                       </Badge>
                     )}
+                    {!currentFavor.acceptedBy && (
+                      <Button
+                        ml={2}
+                        hidden={authContext.user?.uid === currentFavor.postedBy}
+                        onClick={handleAccept}
+                      >
+                        Accept
+                      </Button>
+                    )}
                   </Flex>
-
                   <Text fontSize="sm" color="gray">
                     Posted at{" "}
                     {new Date(currentFavor.datePosted).toLocaleString("en-US", {
@@ -158,18 +163,6 @@ export function FavorPost() {
                       hour12: true,
                     })}
                   </Text>
-
-                  {currentFavor.acceptedBy && (
-                    <Text fontSize="sm" color="gray">
-                      Accepted by:{" "}
-                      <Link
-                        color="green.600"
-                        href={`/profile/${currentFavor.acceptedBy}`}
-                      >
-                        {currentFavor.acceptedByName}
-                      </Link>
-                    </Text>
-                  )}
                 </Flex>
               </Box>
             </Box>
