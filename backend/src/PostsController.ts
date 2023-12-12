@@ -280,6 +280,28 @@ export class PostsController extends Controller {
     }
   }
 
+  @Delete('service/{serviceId}')
+  @Middlewares(ensureToken)
+  public async deleteServicePost(serviceId: string, @Request() req: express.Request) {
+    const userId = req.params.loggedInUid;
+    const ref = FirebaseUsage.db.collection('services').doc(serviceId);
+    const doc = await ref.get();
+    if (doc.data()?.postedBy !== userId) return 403;
+    await ref.delete();
+    return 200;
+  }
+
+  @Delete('favor/{favorId}')
+  @Middlewares(ensureToken)
+  public async deleteFavorPost(favorId: string, @Request() req: express.Request) {
+    const userId = req.params.loggedInUid;
+    const ref = FirebaseUsage.db.collection('favors').doc(favorId);
+    const doc = await ref.get();
+    if (doc.data()?.postedBy !== userId) return 403;
+    await ref.delete();
+    return 200;
+  }
+
   @Delete('favorite/{postId}')
   @Middlewares(ensureToken)
   public async deleteFavorite(postId: string, @Request() req: express.Request) {

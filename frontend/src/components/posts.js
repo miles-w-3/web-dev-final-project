@@ -40,8 +40,6 @@ function MyPostsComponent() {
 
         const result = await getUserFavorites();
         if (!result) return;
-        // Service and Favors
-
         // check service
         setFavoritesServices(result.favors.concat(result.services));
 
@@ -52,11 +50,6 @@ function MyPostsComponent() {
     console.log(`UserContext is ${authContext.user}`);
     if (authContext.user) fetchPosts();
   }, [authContext.user]);
-
-  console.log(`MyPosts`, JSON.stringify(sortedPosts));
-  console.log(`Purchase`, JSON.stringify(purchased));
-  console.log(`Accept`, JSON.stringify(accepted));
-  console.log(`Favorites`, JSON.stringify(favoritesServices));
 
   return (
     <div className="d-flex flex-column align-items-center ">

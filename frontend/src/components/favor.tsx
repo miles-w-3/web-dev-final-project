@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Favor } from "../../../shared/types/posts";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   getFavor,
   acceptFavor,
   removeFavorite,
   addFavorite,
+  removeFavor,
+  getIsFavorite,
 } from "../clients/post";
 import {
   Box,
@@ -19,33 +21,41 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaTrash } from "react-icons/fa";
 
 export function FavorPost() {
-  const { favorId } = useParams();
+  let { favorId } = useParams();
+  const [currentFavorId, setCurrentFavorId] = useState<string | undefined>(favorId)
   const [currentFavor, setCurrentFavor] = useState<Favor | undefined>();
   const authContext = useAuthContext();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const getCurrentService = async () => {
-      if (!favorId) {
-        setCurrentFavor(undefined);
+    const getCurrentFavor = async () => {
+      if (!currentFavorId) {
+        navigate('/');
         return;
       }
 
-      const favorFromBackend = await getFavor(favorId);
+      const favorFromBackend = await getFavor(currentFavorId);
+      if (!favorFromBackend) {
+        navigate('/');
+        return;
+      }
+
       setCurrentFavor(favorFromBackend);
+      setIsFavorite(await getIsFavorite(currentFavorId));
     };
 
-    getCurrentService();
-  }, [favorId]);
+    getCurrentFavor();
+  }, [currentFavorId, navigate]);
 
   const handleAccept = async () => {
-    if (!favorId || !currentFavor) return;
+    if (!currentFavorId || !currentFavor) return;
     try {
-      const userInfo = await acceptFavor(favorId);
+      const userInfo = await acceptFavor(currentFavorId);
       const updatedFavor = {
         ...currentFavor,
         acceptedBy: userInfo.uid,
@@ -64,14 +74,14 @@ export function FavorPost() {
   };
 
   const handleFavorite = async () => {
-    if (!favorId) return;
+    if (!currentFavorId) return;
     if (isFavorite) {
-      await removeFavorite(favorId);
+      await removeFavorite(currentFavorId);
       setIsFavorite(false);
     } else {
       // adding a favorite
       try {
-        await addFavorite(favorId);
+        await addFavorite(currentFavorId);
         setIsFavorite(true);
       } catch {
         toast({
@@ -84,9 +94,31 @@ export function FavorPost() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!currentFavorId) return;
+    try {
+      await removeFavor(currentFavorId);
+      toast({
+        title: `Deleted favor post ${currentFavor?.name}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setCurrentFavorId(undefined); // force navigation away from page
+    }
+    catch {
+      toast({
+        title: "Failed to delete favor post",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }
+
   return (
     <>
-      {favorId && currentFavor && (
+      {currentFavorId && currentFavor && (
         <div className="d-flex justify-content-center">
           <div className="d-flex justify-content-center align-items-start pt-5">
             <Box style={{ width: "600px" }}>
@@ -98,12 +130,21 @@ export function FavorPost() {
                   <Text color="gray">Favor</Text>
                   <Text>{currentFavor.description}</Text>
                 </Flex>
-                <IconButton
-                  className="ms-4"
-                  icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
-                  onClick={handleFavorite}
-                  aria-label={isFavorite ? "Unfavorite" : "Favorite"}
-                />
+                <Box>
+                  <IconButton
+                    className="ms-4"
+                    icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                    onClick={handleFavorite}
+                    aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+                  />
+                  {currentFavor.postedBy === authContext.user?.uid && <IconButton
+                    className="ms-4"
+                    colorScheme="red"
+                    icon={<FaTrash />}
+                    onClick={handleDelete}
+                    aria-label="delete-favor"
+                  />}
+                </Box>
               </Flex>
               <Divider />
               <Box p={4}>

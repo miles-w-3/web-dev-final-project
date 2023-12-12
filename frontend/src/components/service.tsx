@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Service } from "../../../shared/types/posts";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   getService,
   purchaseService,
   getIsFavorite,
   removeFavorite,
   addFavorite,
+  removeService,
 } from "../clients/post";
 import {
   Box,
@@ -20,36 +21,42 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaTrash } from "react-icons/fa";
 
 export function ServicePost() {
   const { serviceId } = useParams();
+  const [currentServiceId, setCurrentServiceId] = useState<string|undefined>(serviceId);
   const [currentService, setCurrentService] = useState<Service | undefined>();
   const authContext = useAuthContext();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   // hook on service id selection
   useEffect(() => {
     const getCurrentService = async () => {
-      if (!serviceId) {
-        setCurrentService(undefined);
+      if (!currentServiceId) {
+        navigate('/');
         return;
       }
 
-      setIsFavorite(await getIsFavorite(serviceId));
+      const serviceFromBackend = await getService(currentServiceId);
+      if (!serviceFromBackend) {
+        navigate('/');
+        return;
+      }
 
-      const serviceFromBackend = await getService(serviceId);
+      setIsFavorite(await getIsFavorite(currentServiceId));
       setCurrentService(serviceFromBackend);
     };
 
     getCurrentService();
-  }, [serviceId]);
+  }, [currentServiceId]);
 
   const handlePurchase = async () => {
-    if (!serviceId || !currentService) return;
+    if (!currentServiceId || !currentService) return;
     try {
-      const userInfo = await purchaseService(serviceId);
+      const userInfo = await purchaseService(currentServiceId);
       setCurrentService({
         ...currentService,
         purchasedBy: userInfo.uid,
@@ -67,14 +74,14 @@ export function ServicePost() {
   };
 
   const handleFavorite = async () => {
-    if (!serviceId) return;
+    if (!currentServiceId) return;
     if (isFavorite) {
-      await removeFavorite(serviceId);
+      await removeFavorite(currentServiceId);
       setIsFavorite(false);
     } else {
       // adding a favorite
       try {
-        await addFavorite(serviceId);
+        await addFavorite(currentServiceId);
         setIsFavorite(true);
       } catch {
         toast({
@@ -87,9 +94,31 @@ export function ServicePost() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!currentServiceId) return;
+    try {
+      await removeService(currentServiceId);
+      toast({
+        title: `Deleted service post ${currentService?.name}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setCurrentServiceId(undefined); // force navigation away from page
+    }
+    catch {
+      toast({
+        title: "Failed to delete service post",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }
+
   return (
     <>
-      {serviceId && currentService && (
+      {currentServiceId && currentService && (
         <div className="d-flex justify-content-center">
           <div className="d-flex justify-content-center align-items-start pt-5">
             <Box style={{ width: "600px" }}>
@@ -101,12 +130,21 @@ export function ServicePost() {
                   <Text color="gray">Service</Text>
                   <Text>{currentService.description}</Text>
                 </Flex>
-                <IconButton
-                  className="ms-4"
-                  icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
-                  onClick={handleFavorite}
-                  aria-label={isFavorite ? "Unfavorite" : "Favorite"}
-                />
+                <Box>
+                  <IconButton
+                    className="ms-4"
+                    icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                    onClick={handleFavorite}
+                    aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+                  />
+                  {currentService.postedBy === authContext.user?.uid && <IconButton
+                    className="ms-4"
+                    colorScheme="red"
+                    icon={<FaTrash />}
+                    onClick={handleDelete}
+                    aria-label="delete-favor"
+                  />}
+                </Box>
               </Flex>
               <Divider />
               <Box p={4}>
