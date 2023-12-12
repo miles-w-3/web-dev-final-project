@@ -1,6 +1,9 @@
-import { Box, Text, Link } from '@chakra-ui/react';
+import { Box, Text, Link, Badge, Flex, Button, Avatar } from '@chakra-ui/react';
 import React from 'react';
+import { useAuthContext } from '../state/useAuthContext';
 const PostSummary = ({sortedPosts, postType }) => {
+    const authContext = useAuthContext();
+
     if (!sortedPosts) {
         return <></>;
     }
@@ -14,17 +17,32 @@ const PostSummary = ({sortedPosts, postType }) => {
                     style={{ width: '16rem' }}
                 >
                     <Box p={4}>
-                        <Text fontSize='xl' fontWeight='bold' mb={2}>
-                            {post.name}
-                        </Text>
+                        <Flex
+                            align='center'
+                            justify='space-between'
+                        >
+                            <Text fontSize='xl' fontWeight='bold' mb={2}>
+                                {post.name}
+                            </Text>
+                            <Button bgColor='white'>
+                                <Link href={`/profile/${post.postedBy}`}>
+                                    <Avatar size='sm' bg='green.600' />
+                                </Link>
+                            </Button>
+                        </Flex>
                         <Text mb={2}>{post.description}</Text>
                         {post.distance != null && <Text>Distance: {post.distance} miles</Text>}
-                        <button
-                            className="btn btn-warning">
-                            <Link href={`/${postType}/${post.id}`} color='black'>
-                                View Details
-                            </Link>
-                        </button>
+                        {post.price != null && <Text> Price: <Badge variant="outline">{`$${post.price}`}</Badge></Text>}
+                        <Button
+                            isDisabled={authContext.user == null}
+                            colorScheme='cyan'>
+                            {authContext.user == null && 'View Details'}
+                            {authContext.user != null && (
+                                <Link href={`/${postType}/${post.id}`} color='black'>
+                                    View Details
+                                </Link>
+                            )}
+                        </Button>
                     </Box>
                 </Box>
             ))}

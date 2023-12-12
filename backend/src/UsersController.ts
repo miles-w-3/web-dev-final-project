@@ -56,6 +56,19 @@ export class UsersController extends Controller {
     if (userDetails) foundResponse(200, userDetails);
   }
 
+  @Get('anonymous/{userId}')
+  public async anonGetProfile(userId: string,
+    @Res() foundResponse: TsoaResponse<200, UserDetails>) {
+
+    const userDetails = await this._getProfileHelper(userId);
+    if (userDetails) {
+      // make the email anonymous
+      userDetails.email = '<Hidden>'
+      foundResponse(200, userDetails);
+    }
+  }
+
+
   @Get('profile/{uid}')
   @Middlewares(ensureToken)
   public async getProfileByID(uid: string,
@@ -74,6 +87,15 @@ export class UsersController extends Controller {
     }
     const userDetails = { uid, name: data.name, email: data.email, userType: data.userType }
     return userDetails
+  }
+
+  @Post('logout')
+  public async destroyUserSession(@Request() req: express.Request) {
+    req.session.destroy(() => {
+      return 200;
+    });
+    console.log(`Logged out!`)
+
   }
 
 

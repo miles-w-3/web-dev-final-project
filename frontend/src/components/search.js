@@ -1,23 +1,25 @@
 /* global google */
 import React, { useCallback, useEffect, useState } from 'react';
 import { getAllData } from "../clients/post";
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
 } from 'react-places-autocomplete';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Box, Text, Badge } from '@chakra-ui/react'; // Assuming Chakra UI for styling
 import PostSummary from './postSummary'
+import { useAuthContext } from '../state/useAuthContext';
 
 function SearchComponent() {
+  const authContext = useAuthContext();
   const [address, setAddress] = useState('');
   const [keyword, setKeyword] = useState('');
   const [postType, setPostType] = useState("service");
   const [posts, setPosts] = useState(undefined);
   const [sortedPosts, setSortedPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [hasSearched, setHasSearched] = useSearchParams(false);
+
   const handleSelect = async (selectedAddress) => {
     const results = await geocodeByAddress(selectedAddress);
     await getLatLng(results[0]);
@@ -52,39 +54,73 @@ function SearchComponent() {
   }
 
   const handleSelectPostType = async (selectPostType) => {
-    console.log(selectPostType);
     setPostType(selectPostType);
   };
 
   const handleUpdateParams = () => {
     setSearchParams({ searchType: postType, searchKeyword: keyword ?? '', searchAddress: address });
-    handleGoToSearchResults();
   }
 
-  const handleGoToSearchResults = useCallback(async () => {
-    console.log(`Running handleGoto`)
-    if (address) {
+
+
+
+  // updates the posts whenever they change
+  useEffect(() => {
+    if (!authContext.user) return;
+    // sample posts for now
+    const fetchPosts = async () => {
+      try {
+        const response = await getAllData();
+        setPosts(response);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
+  }, [authContext.user]);
+
+
+  // update search params when url changes, and render results
+  useEffect(() => {
+
+    const searchAddress = searchParams.get('searchAddress');
+    if (searchAddress) {
+      setAddress(searchAddress);
+    }
+    const searchKeyword = searchParams.get('searchKeyword')
+    if (searchKeyword) setKeyword(searchKeyword);
+
+    const searchType = searchParams.get('searchType');
+    if (searchType) {
+      setPostType(searchType);
+    }
+
+    if (!posts) return;
+
+    const handleGoToSearchResults = async () => {
+      console.log(`Running handleGoto`)
+
       try {
         let updatedPosts;
 
-        console.log(`handleResults`, postType);
-        if (posts === undefined) {
-          updatedPosts = [];
-        }
-        else if (postType === "favor") {
-          updatedPosts = [...posts.favors];
-        } else {
+        if (searchType === "service") {
           updatedPosts = [...posts.services];
         }
+        else if (searchType === "favor") {
+          updatedPosts = [...posts.favors];
+        } else {
+          updatedPosts = [];
+        }
 
-        if (keyword) {
+        if (searchKeyword) {
           updatedPosts = updatedPosts.filter(
             (post) =>
-              post.name.toLowerCase().includes(keyword.toLowerCase())
+              post.name.toLowerCase().includes(searchKeyword.toLowerCase())
           )
         }
 
-        const results = await geocodeByAddress(address);
+        const results = await geocodeByAddress(searchAddress);
         const selectedLatLng = await getLatLng(results[0]);
 
         updatedPosts = await Promise.all(
@@ -103,45 +139,20 @@ function SearchComponent() {
       } catch (error) {
         console.error('Error during search:', error);
       }
-    }
-  }, [address, postType, keyword, posts]);
-
-  // updates the posts whenever they change
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await getAllData();
-        setPosts(response);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
     };
 
-    fetchPosts();
-  }, []);
+    if (searchAddress) handleGoToSearchResults();
 
-  // update search params when url changes
-  useEffect(() => {
-    console.log(`SearchParams is now ${JSON.stringify(searchParams)}`);
-    const searchAddress = searchParams.get('searchAddress');
-    if (searchAddress) {
-      setAddress(searchAddress);
-    }
-    const searchKeyword = searchParams.get('searchKeyword')
-    if (searchKeyword) setKeyword(searchKeyword);
-
-    const searchType = searchParams.get('searchType');
-    if (searchType) {
-      setPostType(searchType);
-    }
-  }, [searchParams, sortedPosts]);
+    // we don't want goToSearchresults to be a dep here, we just want to run search results whenever url changes
+  }, [searchParams, posts]);
 
   return (
     <>
+    {!authContext.user && <Navigate to='/login' />}
       <div className='container mt-4'>
         <div className='row align-items-center pb-4 border-bottom '>
           <div className='col-md-4'>
-            <label htmlFor='address'>Address:</label>
+            <label htmlFor='address'>Location:</label>
             <PlacesAutocomplete
               value={address}
               onChange={(newAddress) => setAddress(newAddress)}
@@ -209,8 +220,8 @@ function SearchComponent() {
               className='form-control'
               id='postType'
             >
-              <option value='Service'>Service</option>
-              <option value='Favor'>Favor</option>
+              <option value='service'>Service</option>
+              <option value='favor'>Favor</option>
             </select>
           </div>
           <div className='col-md-1'>
@@ -230,7 +241,7 @@ function SearchComponent() {
             <PostSummary postType={postType} sortedPosts={sortedPosts}/>
           </div>
         )}
-        {sortedPosts.length === 0 && <p>0 results found, please try again.</p>}
+        {sortedPosts.length === 0 && <p>0 results found</p>}
       </div>
     </>
   );

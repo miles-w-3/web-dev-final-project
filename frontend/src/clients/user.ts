@@ -15,6 +15,12 @@ export async function getLoggedInUserDetails() {
   return result;
 }
 
+// get anonymous details about a user, no auth needed
+export async function getAnonymousDetails(uid: string) {
+  const result = (await webClient.get<UserDetails>(`${USERS_URL}/anonymous/${uid}`));
+  return result;
+}
+
 export async function getUserDetails(uid: string) {
   const result = await webClient.get<UserDetails>(`${USERS_URL}/profile/${uid}`);
   console.log(`ud result is ${JSON.stringify(result)}`);
@@ -54,4 +60,8 @@ export async function registerUser(email: string, type: string, name: string,
     console.error(`Failed to register user: ${JSON.stringify(err)}`);
     return false;
   }
+}
+
+export async function logOutUser() {
+  await webClient.post(`${USERS_URL}/logout`);
 }

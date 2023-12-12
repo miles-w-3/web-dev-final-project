@@ -7,7 +7,7 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-import { logInUser, registerUser } from "../clients/user";
+import { logInUser, logOutUser, registerUser } from "../clients/user";
 import { auth } from './firebaseConnect'
 import AuthContext, { AuthContextFields } from './AuthContext'
 import { useNavigate } from "react-router";
@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const nav = useNavigate()
   const [user, setUser] = useState<User | undefined>(undefined);
+  // when the component first starts up, we haven't loaded the auth yet
+  const [loading, setLoading] = useState<boolean>(true);
 
   async function logIn(email: string, password: string) {
     const loggedInUser: UserCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -28,7 +30,6 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     console.log(`got loggedin user ${JSON.stringify(loggedInUser)}`);
     console.log(`Token is ${idToken}`)
     await logInUser(idToken);
-    console.log(`COMPLETED LOGIN`)
 
   }
 
@@ -39,7 +40,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     await registerUser(email, userType, name, signedInUser.user.uid, idToken);
   }
   async function logOut() {
-    await signOut(auth);
+    await signOut(auth); // firebase signout
+    await logOutUser(); // backend logout
   }
 
   // add middleware for handling unauth to log the user out
@@ -50,8 +52,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     (error: AxiosError) => {
       // Handle 401 Unauthorized responses
       if (error.response?.status === 401) {
-        console.error("Received 401, logging the user out")
         nav('/login');
+        console.error("Received 401, logging the user out on client-side");
         logOut();
       }
     }
@@ -59,11 +61,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
+      if (loading) setLoading(false); // on the first time, we have loaded the page
       setUser(currentUser ?? undefined);
-      if (!currentUser) {
-        nav('/login');
-      }
-      console.log("Auth changed:", currentUser);
     });
 
     return (() => {
@@ -72,11 +71,12 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     })
   }, []);
 
-  const contextFields: AuthContextFields = { user, logIn, logOut, signUp }
+  const contextFields: AuthContextFields = { user, logIn, logOut, signUp, }
 
+  // render children once the loading is complete
   return (
     <AuthContext.Provider value={contextFields}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

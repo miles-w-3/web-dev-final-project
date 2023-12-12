@@ -4,9 +4,9 @@
 
 import { Navigate, useNavigate, useParams } from "react-router"
 import { useAuthContext } from "../state/useAuthContext";
-import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, Stack, useToast } from "@chakra-ui/react";
+import { Box, Button, Flex, FormControl, Heading, Input, InputGroup, Stack, Text, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { getUserDetails, updateUserDetails } from "../clients/user";
+import { getAnonymousDetails, getUserDetails, updateUserDetails } from "../clients/user";
 import { UserDetails } from "../../../shared/types/users";
 import { CreatePost } from "./createPost";
 
@@ -14,34 +14,39 @@ import { CreatePost } from "./createPost";
 export default function UserProfile() {
   const userContext = useAuthContext();
   const [userDetails, setUserDetails] = useState<UserDetails>({ uid: '', email: '', name: '', userType: 'requestor'});
-  const [currentUser, setCurrentUser] = useState<string | undefined>(userContext.user?.uid);
+  const [currentUser, setCurrentUser] = useState<string | undefined>();
   const [showingCreatePost, setShowingCreatePost] = useState<boolean>(false);
-  const [userPosts, setUserPosts] = useState([]);
-  let { profile } = useParams();
-  console.log(`Profile is ${JSON.stringify(profile)}`);
+  let { profileId } = useParams();
 
   const toast = useToast();
-  // hook to make sure that we don't see this page when logged out
-  useEffect(() => {
 
-    const handleUserDetails = async (uid: string) => {
-      console.log(`About to get user details for ${uid}`);
-      const result = await getUserDetails(uid);
+  // hook to load user details
+  useEffect(() => {
+    // defer to the url, otherwise look at the logged in user
+    const newCurrentUser = profileId ?? userContext.user?.uid;
+
+    setCurrentUser(newCurrentUser);
+
+    const handleUserDetails = async () => {
+      if (!currentUser) return;
+      let result;
+      // if we are logged in, get full details of a user
+      if (userContext.user) {
+        result = await getUserDetails(currentUser);
+      } else { // otherwise, get the filtered results
+        result = await getAnonymousDetails(currentUser);
+      }
+
       console.log(`in hud, Got user details ${JSON.stringify(result)}`)
       if (result && result.data){
         setUserDetails(result.data);
-        // const postsResult = await getPostsForUser(uid);
-        // console.log(`User posts: ${JSON.stringify(postsResult)}`);
-        // if (postsResult && postsResult.data) {
-        //   setUserPosts(postsResult.data);
-        // }
       }
     }
-    // leave this page if we are logged in
 
-    if (currentUser) handleUserDetails(currentUser);
 
-  }, [userContext, currentUser, setUserDetails]);
+    if (currentUser) handleUserDetails();
+
+  }, [profileId, userContext.user, currentUser, setUserDetails]);
 
 
   const handleSave = async () => {
@@ -76,10 +81,11 @@ export default function UserProfile() {
 
   return (
     <>
+      {!profileId && !userContext.user && <Navigate to='/login'/>}
       <CreatePost userType={userDetails.userType} showing={showingCreatePost} hide={() => setShowingCreatePost(false)} />
       <Flex
         flexDirection="column"
-        width="100wh"
+        width="100"
         height="100vh"
         backgroundColor="gray.200"
         justifyContent="center"
@@ -91,7 +97,7 @@ export default function UserProfile() {
           justifyContent="center"
           alignItems="center"
         >
-          <Heading color="green.600"> {'User'}'s Account</Heading>
+          <Heading color="green.600">Manage Account</Heading>
           <Box minW={{ base: "90%", md: "468px" }}>
 
             <form>
@@ -106,15 +112,16 @@ export default function UserProfile() {
                   <p>Account type: {userDetails.userType}</p>
                 </div>
 
-                <InputGroup>
-                  <Input
+                <Flex align='center' justify='space-around'>
+                  <Text verticalAlign='bottom'>Name:</Text>
+                  <Input ms={2}
                     disabled={currentUser !== userContext.user?.uid}
                     type='text'
                     placeholder="Name"
                     value={userDetails.name}
                     onChange={event => handleNameUpdate(event)}
                   />
-                </InputGroup>
+                </Flex>
 
                 <Button
                   hidden={currentUser !== userContext.user?.uid}
@@ -139,9 +146,10 @@ export default function UserProfile() {
                 </Button>
 
                 <Button
+                  hidden={currentUser !== userContext.user?.uid}
                   borderRadius={0}
                   variant="solid"
-                  colorScheme="gray"
+                  colorScheme="teal"
                   width="full"
                   onClick={handleLogout}
                 >
