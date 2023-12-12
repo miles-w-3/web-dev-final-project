@@ -115,6 +115,33 @@ export class PostsController extends Controller {
     }
   }
 
+  @Get('anonymous')
+  public async getAnonymousPosts() {
+
+    try {
+      const result: Posts = {services: [], favors: []};
+
+      const servicesSnapshot = await FirebaseUsage.db.collection('services').get();
+      servicesSnapshot.forEach((doc) => {
+        const sService = doc.data() as SerializedService;
+        sService.id = doc.id;
+        result.services.push(sService);
+      });
+
+      const favorsSnapshot = await FirebaseUsage.db.collection('favors').get();
+      favorsSnapshot.forEach((doc) => {
+        const sFavor = doc.data() as SerializedFavor;
+        sFavor.id = doc.id;
+        result.favors.push(sFavor);
+      });
+
+    } catch {
+      this.setStatus(500);
+    }
+
+    return {}
+  }
+
   @Post('favor')
   @Middlewares(ensureToken)
   public async addNewFavor(@Body() postInfo: SerializedFavor) {
