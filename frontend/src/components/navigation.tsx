@@ -37,13 +37,15 @@ export function Navigation() {
   };
   return (
     <Flex
-      as="nav"
+      id='navbar'
+      as="header"
       align='center'
       justify="space-between"
       wrap="wrap"
       w="100%"
       p={4}
       bgColor='green.600'
+      position='static'
     >
       <Link to='/'>
         <Text display="block" color='whitesmoke' fontWeight='bold'>

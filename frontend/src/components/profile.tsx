@@ -97,7 +97,7 @@ export default function UserProfile() {
           justifyContent="center"
           alignItems="center"
         >
-          <Heading color="green.600">Manage Account</Heading>
+          <Heading color="green.600">{currentUser === userContext.user?.uid ? 'Manage' : 'View'} Account</Heading>
           <Box minW={{ base: "90%", md: "468px" }}>
 
             <form>

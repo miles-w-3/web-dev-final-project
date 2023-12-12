@@ -1,5 +1,4 @@
 import { Box, Text, Link, Avatar, Flex, Button } from "@chakra-ui/react";
-import { Link as ChakraLink } from "@chakra-ui/react";
 import React from "react";
 import { useAuthContext } from "../state/useAuthContext";
 
@@ -11,35 +10,37 @@ const PostSummary = ({ sortedPosts, postType }) => {
   }
 
   return (
-    <div className="w-75 d-flex flex-wrap justify-content-start mb-5">
+    <Flex>
       {sortedPosts.map((post) => (
-        <div className="card m-2" style={{ width: "16rem", height: "10rem" }}>
-          /* To do: disable this when */
-          <ChakraLink
-            key={post.id}
-            href={authContext.user == null ? "" : `/${postType}/${post.id}`}
-            color="black"
-            _hover={{ textDecor: "none" }}
-          >
-            <Box p={4}>
-              <Flex align="center" justify="space-between">
+        <div key={post.id} className="card m-2" style={{ width: "16rem", height: "10rem" }}>
+        <Box p={4}>
+            <Flex align="center" justify="space-between">
+            {authContext.user && (
+                <Link href={`/${postType}/${post.id}`} >
+                    <Text fontSize="xl" fontWeight="bold" mb={2}>
+                        {post.name}
+                    </Text>
+                </Link>
+            )}
+            {!authContext.user && (
                 <Text fontSize="xl" fontWeight="bold" mb={2}>
-                  {post.name}
+                    {post.name}
                 </Text>
-                <Button bgColor="white">
-                  <Link href={`/profile/${post.postedBy}`}>
-                    <Avatar size="sm" bg="green.600" />
-                  </Link>
-                </Button>
-              </Flex>
-              <Text noOfLines={3} mb={2}>
-                {post.description}
-              </Text>
-            </Box>
-          </ChakraLink>
+            )}
+
+            <Button bgColor="white">
+                <Link href={`/profile/${post.postedBy}`}>
+                <Avatar size="sm" bg="green.600" />
+                </Link>
+            </Button>
+            </Flex>
+            <Text noOfLines={3} mb={2} fontSize={18}>
+            {post.description}
+            </Text>
+        </Box>
         </div>
       ))}
-    </div>
+    </Flex>
   );
 };
 
