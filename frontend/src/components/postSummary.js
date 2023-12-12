@@ -1,53 +1,42 @@
-import { Box, Text, Link, Badge, Flex, Button, Avatar } from '@chakra-ui/react';
-import React from 'react';
-import { useAuthContext } from '../state/useAuthContext';
-const PostSummary = ({sortedPosts, postType }) => {
-    const authContext = useAuthContext();
+import { Box, Text, Link, Avatar } from "@chakra-ui/react";
+import { Link as ChakraLink } from "@chakra-ui/react";
+import React from "react";
+const PostSummary = ({ sortedPosts, postType }) => {
+  if (!sortedPosts) {
+    return <></>;
+  }
 
-    if (!sortedPosts) {
-        return <></>;
-    }
-
-    return (
-        <div className='d-flex flex-wrap'>
-            {sortedPosts.map((post) => (
-                <Box
-                    key={post.id}
-                    className='card m-2'
-                    style={{ width: '16rem' }}
-                >
-                    <Box p={4}>
-                        <Flex
-                            align='center'
-                            justify='space-between'
-                        >
-                            <Text fontSize='xl' fontWeight='bold' mb={2}>
-                                {post.name}
-                            </Text>
-                            <Button bgColor='white'>
-                                <Link href={`/profile/${post.postedBy}`}>
-                                    <Avatar size='sm' bg='green.600' />
-                                </Link>
-                            </Button>
-                        </Flex>
-                        <Text mb={2}>{post.description}</Text>
-                        {post.distance != null && <Text>Distance: {post.distance} miles</Text>}
-                        {post.price != null && <Text> Price: <Badge variant="outline">{`$${post.price}`}</Badge></Text>}
-                        <Button
-                            isDisabled={authContext.user == null}
-                            colorScheme='cyan'>
-                            {authContext.user == null && 'View Details'}
-                            {authContext.user != null && (
-                                <Link href={`/${postType}/${post.id}`} color='black'>
-                                    View Details
-                                </Link>
-                            )}
-                        </Button>
-                    </Box>
-                </Box>
-            ))}
+  return (
+    <div className="w-75 d-flex flex-wrap justify-content-start mb-5">
+      {sortedPosts.map((post) => (
+        <div className="card m-2" style={{ width: "16rem", height: "10rem" }}>
+          /* To do: disable this when */
+          <ChakraLink
+            key={post.id}
+            href={authContext.user == null ? "" : `/${postType}/${post.id}`}
+            color="black"
+            _hover={{ textDecor: "none" }}
+          >
+            <Box p={4}>
+              <Flex align="center" justify="space-between">
+                <Text fontSize="xl" fontWeight="bold" mb={2}>
+                  {post.name}
+                </Text>
+                <Button bgColor="white">
+                  <Link href={`/profile/${post.postedBy}`}>
+                    <Avatar size="sm" bg="green.600" />
+                  </Link>
+                </Button>
+              </Flex>
+              <Text noOfLines={3} mb={2}>
+                {post.description}
+              </Text>
+            </Box>
+          </ChakraLink>
         </div>
-    );
+      ))}
+    </div>
+  );
 };
 
 export default PostSummary;

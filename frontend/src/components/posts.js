@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import { getPostsByUser, getAcceptedPurchase } from "../clients/post";
 import PostSummary from './postSummary'
 import { useNavigate, Link, Navigate } from 'react-router-dom';
@@ -50,16 +50,23 @@ function MyPostsComponent() {
     console.log(`Accept`, JSON.stringify(accepted));
 
     return (
-        <div>
-            {authContext.user == null && <Navigate to='/login' />}
-            <h3>My Posts</h3>
-            <PostSummary sortedPosts={sortedPosts} postType={postType} />
-            <h3>Favorited Posts</h3>
-            <h3>Purchased Services</h3>
-            <PostSummary sortedPosts={purchased} postType={"service"} />
-            <h3>Accepted Favors</h3>
-            <PostSummary sortedPosts={accepted} postType={"favor"} />
-        </div>
+            
+            <div className="d-flex flex-column align-items-center ">
+{authContext.user == null && <Navigate to='/login' />}
+    <div className="w-75 p-4">
+      <h3 className="fw-light">My Posts</h3>
+      <PostSummary sortedPosts={sortedPosts} postType={postType} />
+
+      <h3 className="fw-light">Favorited Posts</h3>
+      {/* Add the component for favorited posts here */}
+
+      <h3 className="fw-light">Purchased Services</h3>
+      <PostSummary sortedPosts={purchased} postType={"service"} />
+
+      <h3 className="fw-light">Accepted Favors</h3>
+      <PostSummary sortedPosts={accepted} postType={"favor"} />
+    </div>
+    </div>
     );
 }
 
