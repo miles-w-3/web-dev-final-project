@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Favor } from "../../../shared/types/posts";
 import { useParams } from "react-router";
-import { getFavor, acceptFavor, removeFavorite, addFavorite } from "../clients/post";
-import { Box, Button, Divider, Flex, Text, Link, useToast } from "@chakra-ui/react";
+import {
+  getFavor,
+  acceptFavor,
+  removeFavorite,
+  addFavorite,
+} from "../clients/post";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Text,
+  Link,
+  useToast,
+  IconButton,
+  Badge,
+} from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 export function FavorPost() {
   const { favorId } = useParams();
@@ -13,7 +29,6 @@ export function FavorPost() {
   const toast = useToast();
 
   useEffect(() => {
-
     const getCurrentService = async () => {
       if (!favorId) {
         setCurrentFavor(undefined);
@@ -22,7 +37,7 @@ export function FavorPost() {
 
       const favorFromBackend = await getFavor(favorId);
       setCurrentFavor(favorFromBackend);
-    }
+    };
 
     getCurrentService();
   }, [favorId]);
@@ -31,21 +46,22 @@ export function FavorPost() {
     if (!favorId || !currentFavor) return;
     try {
       const userInfo = await acceptFavor(favorId);
-      const updatedFavor = {...currentFavor,
+      const updatedFavor = {
+        ...currentFavor,
         acceptedBy: userInfo.uid,
         acceptedByName: userInfo.name,
       };
       setCurrentFavor(updatedFavor);
     } catch {
       toast({
-        title: 'Failed to accept favor',
-        status: 'error',
+        title: "Failed to accept favor",
+        status: "error",
         duration: 3000,
         isClosable: true,
       });
       return;
     }
-  }
+  };
 
   const handleFavorite = async () => {
     if (!favorId) return;
@@ -59,66 +75,107 @@ export function FavorPost() {
         setIsFavorite(true);
       } catch {
         toast({
-          title: 'Failed to add favor to favorites',
-          status: 'error',
+          title: "Failed to add favor to favorites",
+          status: "error",
           duration: 3000,
           isClosable: true,
         });
       }
     }
-  }
+  };
 
   return (
     <>
       {favorId && currentFavor && (
-        <Box>
-          <Text fontSize={18} fontWeight='bold'>
-            {currentFavor.name}
-          </Text>
-          <Flex
-            p={4}
-            align='center'
-            justify='space-between'
-          >
-            <Text color='gray'>
-              Favor Posting
-            </Text>
-            <Button
-              colorScheme={isFavorite ? 'red' : 'yellow'}
-              onClick={handleFavorite}
-            >
-              {isFavorite ? 'Unfavorite' : 'Favorite'}
-            </Button>
-          </Flex>
-          <Divider />
-          <Box p={4}>
-            <Text>{currentFavor.description}</Text>
-            <Text>Posted at {currentFavor.datePosted.toString()}</Text>
-            <Text>Needed by {currentFavor.dateNeeded.toString()}</Text>
-            <Text>
-              Posted by: <Link color='green.600' href={`/profile/${currentFavor.postedBy}`}>{currentFavor.postedByName}</Link>
-            </Text>
-            {currentFavor.acceptedBy && (
-              <Text>
-                Accepted by: <Link color='green.600' href={`/profile/${currentFavor.acceptedBy}`}>
-                  {currentFavor.acceptedByName}
-                </Link>
-              </Text>)}
-            {!currentFavor.acceptedBy && (
-              <Text>
-                Available
-                <Button ms={2}
-                  hidden={authContext.user?.uid === currentFavor.postedBy}
-                  onClick={handleAccept}
-                >
-                  Accept
-                </Button>
-              </Text>
-            )}
-          </Box>
-        </Box>
+        <div className="d-flex justify-content-center">
+          <div className="d-flex justify-content-center align-items-start pt-5">
+            <Box style={{ width: "600px" }}>
+              <Flex p={4} align="flex-start" justify="space-between">
+                <Flex direction="column">
+                  <Text fontSize={24} fontWeight="bold">
+                    {currentFavor.name}
+                  </Text>
+                  <Text color="gray">Favor</Text>
+                  <Text>{currentFavor.description}</Text>
+                </Flex>
+                <IconButton
+                  className="ms-4"
+                  icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                  onClick={handleFavorite}
+                  aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+                />
+              </Flex>
+              <Divider />
+              <Box p={4}>
+                <Flex direction="column">
+                  <Flex justify="space-between" align="center">
+                    <Text fontSize="lg" color="gray">
+                      Posted by:{" "}
+                      <Link
+                        color="green.600"
+                        href={`/profile/${currentFavor.postedBy}`}
+                      >
+                        {currentFavor.postedByName}
+                      </Link>
+                    </Text>
+                    {!currentFavor.acceptedBy && (
+                      <Badge colorScheme="green" fontSize="sm">
+                        Available
+                        <Button
+                          ml={2}
+                          hidden={
+                            authContext.user?.uid === currentFavor.postedBy
+                          }
+                          onClick={handleAccept}
+                        >
+                          Accept
+                        </Button>
+                      </Badge>
+                    )}
+                  </Flex>
+
+                  <Text fontSize="sm" color="gray">
+                    Posted at{" "}
+                    {new Date(currentFavor.datePosted).toLocaleString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: true,
+                    })}
+                  </Text>
+                  <Text fontSize="sm" color="gray">
+                    Needed by{" "}
+                    {new Date(currentFavor.dateNeeded).toLocaleString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: true,
+                    })}
+                  </Text>
+
+                  {currentFavor.acceptedBy && (
+                    <Text fontSize="sm" color="gray">
+                      Accepted by:{" "}
+                      <Link
+                        color="green.600"
+                        href={`/profile/${currentFavor.acceptedBy}`}
+                      >
+                        {currentFavor.acceptedByName}
+                      </Link>
+                    </Text>
+                  )}
+                </Flex>
+              </Box>
+            </Box>
+          </div>
+        </div>
       )}
     </>
-  )
-
+  );
 }

@@ -2,13 +2,28 @@ import React, { useState } from "react";
 import { Box, Text, Flex, Badge, Link } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 import { AuthContextFields } from "../state/AuthContext";
+import { SerializedFavor, SerializedService } from "../../../shared/types/posts";
 
 function Home(): JSX.Element {
-  // TODO: Pull from backend
+    const [sortedPosts, setMyPosts] = useState<SerializedFavor[] | SerializedService[]>([]);
+
+    // Favorite Services and Favorite Favors 
   const [posts] = useState([
     {
       name: "Sample Service",
       description: "This is a sample service post.",
+      location: { lat: 41.836828, lng: -71.993255 },
+      datePosted: new Date(),
+      postedBy: null,
+      price: 20,
+      purchasedBy: "",
+      postedByName: "",
+      purchasedByName: "",
+    },
+    {
+      name: "Sample Service",
+      description:
+        "This is a sample service post with an extremeley long description so we can see how this affects the height of the cards whic is really annputing.",
       location: { lat: 41.836828, lng: -71.993255 },
       datePosted: new Date(),
       postedBy: null,
@@ -58,10 +73,7 @@ function Home(): JSX.Element {
             Huskies on campus!
           </h2>
           <div className="m-5">
-            <Link
-              color='green.600'
-              href='/search'
-              fontSize={24}>
+            <Link color="green.600" href="/search" fontSize={24}>
               Search for what you need
             </Link>
           </div>
