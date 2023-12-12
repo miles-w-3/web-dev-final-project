@@ -61,3 +61,7 @@ export async function registerUser(email: string, type: string, name: string,
     return false;
   }
 }
+
+export async function logOutUser() {
+  await webClient.post(`${USERS_URL}/logout`);
+}

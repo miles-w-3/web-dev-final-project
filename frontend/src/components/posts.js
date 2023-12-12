@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import { getPostsByUser, getAcceptedPurchase } from "../clients/post";
 import PostSummary from './postSummary'
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { getLoggedInUserDetails } from '../clients/user';
+import { useAuthContext } from '../state/useAuthContext';
 
 function MyPostsComponent() {
     const [sortedPosts, setMyPosts] = useState([]);
@@ -10,6 +11,8 @@ function MyPostsComponent() {
     const [purchased, setPurchase] = useState([]);
     const [accepted, setAccept] = useState([]);
     const [postType, setPostType] = useState("service");
+
+    const authContext = useAuthContext();
 
 
     useEffect(() => {
@@ -40,14 +43,15 @@ function MyPostsComponent() {
             }
         };
 
-        fetchPosts();
-    }, []);
+        if (authContext.user) fetchPosts();
+    }, [authContext.user]);
     console.log(`MyPosts`, JSON.stringify(sortedPosts));
     console.log(`Purchase`, JSON.stringify(purchased));
     console.log(`Accept`, JSON.stringify(accepted));
 
     return (
         <div>
+            {authContext.user == null && <Navigate to='/login' />}
             <h3>My Posts</h3>
             <PostSummary sortedPosts={sortedPosts} postType={postType} />
             <h3>Favorited Posts</h3>

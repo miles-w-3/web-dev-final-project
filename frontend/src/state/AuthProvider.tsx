@@ -7,7 +7,7 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-import { logInUser, registerUser } from "../clients/user";
+import { logInUser, logOutUser, registerUser } from "../clients/user";
 import { auth } from './firebaseConnect'
 import AuthContext, { AuthContextFields } from './AuthContext'
 import { useNavigate } from "react-router";
@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     await registerUser(email, userType, name, signedInUser.user.uid, idToken);
   }
   async function logOut() {
-    await signOut(auth);
+    await signOut(auth); // firebase signout
+    await logOutUser(); // backend logout
   }
 
   // add middleware for handling unauth to log the user out
@@ -49,9 +50,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     (error: AxiosError) => {
       // Handle 401 Unauthorized responses
       if (error.response?.status === 401) {
-        console.error("Received 401, logging the user out")
         nav('/login');
+        console.error("Received 401, logging the user out")
         logOut();
+
       }
     }
   );

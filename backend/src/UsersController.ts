@@ -89,6 +89,15 @@ export class UsersController extends Controller {
     return userDetails
   }
 
+  @Post('logout')
+  public async destroyUserSession(@Request() req: express.Request) {
+    req.session.destroy(() => {
+      return 200;
+    });
+    console.log(`Logged out!`)
+
+  }
+
 
 
   @Get('favorites')

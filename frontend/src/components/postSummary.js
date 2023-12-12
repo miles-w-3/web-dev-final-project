@@ -1,6 +1,9 @@
 import { Box, Text, Link, Badge, Flex, Button, Avatar } from '@chakra-ui/react';
 import React from 'react';
+import { useAuthContext } from '../state/useAuthContext';
 const PostSummary = ({sortedPosts, postType }) => {
+    const authContext = useAuthContext();
+
     if (!sortedPosts) {
         return <></>;
     }
@@ -31,10 +34,14 @@ const PostSummary = ({sortedPosts, postType }) => {
                         {post.distance != null && <Text>Distance: {post.distance} miles</Text>}
                         {post.price != null && <Text> Price: <Badge variant="outline">{`$${post.price}`}</Badge></Text>}
                         <Button
+                            isDisabled={authContext.user == null}
                             colorScheme='cyan'>
-                            <Link href={`/${postType}/${post.id}`} color='black'>
-                                View Details
-                            </Link>
+                            {authContext.user == null && 'View Details'}
+                            {authContext.user != null && (
+                                <Link href={`/${postType}/${post.id}`} color='black'>
+                                    View Details
+                                </Link>
+                            )}
                         </Button>
                     </Box>
                 </Box>
