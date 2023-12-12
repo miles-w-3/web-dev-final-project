@@ -1,9 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Service } from "../../../shared/types/posts";
 import { useParams } from "react-router";
-import { getService, purchaseService, getIsFavorite, removeFavorite, addFavorite } from "../clients/post";
-import { Box, Button, Divider, Flex, Text, useToast, Link } from "@chakra-ui/react";
+import {
+  getService,
+  purchaseService,
+  getIsFavorite,
+  removeFavorite,
+  addFavorite,
+} from "../clients/post";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Text,
+  Link,
+  useToast,
+  IconButton,
+  Badge,
+} from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 export function ServicePost() {
   const { serviceId } = useParams();
@@ -24,7 +41,7 @@ export function ServicePost() {
 
       const serviceFromBackend = await getService(serviceId);
       setCurrentService(serviceFromBackend);
-    }
+    };
 
     getCurrentService();
   }, [serviceId]);
@@ -37,17 +54,17 @@ export function ServicePost() {
         ...currentService,
         purchasedBy: userInfo.uid,
         purchasedByName: userInfo.name,
-      })
+      });
     } catch {
       toast({
-        title: 'Failed to purchase service',
-        status: 'error',
+        title: "Failed to purchase service",
+        status: "error",
         duration: 3000,
         isClosable: true,
       });
       return;
     }
-  }
+  };
 
   const handleFavorite = async () => {
     if (!serviceId) return;
@@ -61,66 +78,94 @@ export function ServicePost() {
         setIsFavorite(true);
       } catch {
         toast({
-          title: 'Failed to add service to favorites',
-          status: 'error',
+          title: "Failed to add service to favorites",
+          status: "error",
           duration: 3000,
           isClosable: true,
         });
       }
     }
-  }
+  };
 
   return (
     <>
       {serviceId && currentService && (
-        <Box>
-          <Text fontSize={18} fontWeight='bold'>
-            {currentService.name}
-          </Text>
-          <Flex
-            p={4}
-            align='center'
-            justify='space-between'
-          >
-            <Text color='gray'>
-              Service Posting
-            </Text>
-            <Button
-              colorScheme={isFavorite ? 'red' : 'yellow'}
-              onClick={handleFavorite}
-            >
-              {isFavorite ? 'Unfavorite' : 'Favorite'}
-            </Button>
-          </Flex>
-          <Divider />
-          <Box p={4}>
-            <Text>{currentService.description}</Text>
-            <Text>Posted at {currentService.datePosted.toString()}</Text>
-            <Text>
-              Posted by: <Link color='green.600' href={`/profile/${currentService.postedBy}`}>{currentService.postedByName}</Link>
-            </Text>
-            {currentService.purchasedBy && (
-              <Text>
-                Accepted by: <Link color='green.600' href={`/profile/${currentService.purchasedBy}`}>
-                  {currentService.purchasedByName}
-                </Link>
-              </Text>)}
-            {!currentService.purchasedBy && (
-              <Text>
-                Available
-                <Button ms={2}
-                  hidden={authContext.user?.uid === currentService.postedBy}
-                  onClick={handlePurchase}
-                >
-                  Purchase
-                </Button>
-              </Text>
+        <div className="d-flex justify-content-center">
+          <div className="d-flex justify-content-center align-items-start pt-5">
+            <Box style={{ width: "600px" }}>
+              <Flex p={4} align="flex-start" justify="space-between">
+                <Flex direction="column">
+                  <Text fontSize={24} fontWeight="bold">
+                    {currentService.name}
+                  </Text>
+                  <Text color="gray">Service</Text>
+                  <Text>{currentService.description}</Text>
+                </Flex>
+                <IconButton
+                  className="ms-4"
+                  icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                  onClick={handleFavorite}
+                  aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+                />
+              </Flex>
+              <Divider />
+              <Box p={4}>
+                <Flex direction="column">
+                  <Flex justify="space-between" align="start">
+                    <Text fontSize="lg" color="gray">
+                      Posted by:{" "}
+                      <Link
+                        color="green.600"
+                        href={`/profile/${currentService.postedBy}`}
+                      >
+                        {currentService.postedByName}
+                      </Link>
+                    </Text>
 
-            )}
-          </Box>
-        </Box>
+                    {currentService.purchasedBy && (
+                      <Badge colorScheme="red" fontSize="sm">
+                        Purchased by:{" "}
+                        <Link
+                          color="green.600"
+                          href={`/profile/${currentService.purchasedBy}`}
+                        >
+                          {currentService.purchasedByName}
+                        </Link>
+                      </Badge>
+                    )}
+                    {!currentService.purchasedBy && (
+                      <Button
+                        ml={2}
+                        hidden={
+                          authContext.user?.uid === currentService.postedBy
+                        }
+                        onClick={handlePurchase}
+                      >
+                        Purchase
+                      </Button>
+                    )}
+                  </Flex>
+                  <Text fontSize="sm" color="gray">
+                    Posted at{" "}
+                    {new Date(currentService.datePosted).toLocaleString(
+                      "en-US",
+                      {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        hour12: true,
+                      }
+                    )}
+                  </Text>
+                </Flex>
+              </Box>
+            </Box>
+          </div>
+        </div>
       )}
     </>
-  )
-
+  );
 }
