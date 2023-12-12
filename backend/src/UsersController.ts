@@ -129,8 +129,6 @@ export class UsersController extends Controller {
       const favoriteQuery = ref.where("userId", "==", userId);
       const snapshots = await favoriteQuery.get();
 
-            // 
-
       for (const favoriteDoc of snapshots.docs) {
         const data = favoriteDoc.data() as Favorite;
         // first try to get from services
@@ -159,8 +157,7 @@ export class UsersController extends Controller {
           }
         }
       }
-      
-      
+
     } catch {
       this.setStatus(500);
       return {};

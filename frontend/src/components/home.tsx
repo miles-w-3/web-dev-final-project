@@ -4,10 +4,10 @@ import { useAuthContext } from "../state/useAuthContext";
 import { Posts, SerializedFavor, SerializedService } from "../../../shared/types/posts";
 import { getAnonymousPosts } from "../clients/post";
 import PostSummary from "./postSummary";
+import { getUserFavorites } from "../clients/user";
 
 function Home(): JSX.Element {
-    const [servicePosts, setServicePosts] = useState<SerializedService[]>([]);
-    const [favorPosts, setFavorPosts] = useState<SerializedFavor[]>([]);
+    const [posts, setPosts] = useState<(SerializedService | SerializedFavor)[]>([]);
 
   const { user } = useAuthContext();
 
@@ -15,13 +15,22 @@ function Home(): JSX.Element {
     const handleAnonymous = async () => {
       const result = await getAnonymousPosts();
       if (!result) return;
-      setServicePosts(result.services);
-      setFavorPosts(result.favors);
+      setPosts([...result.services, ...result.favors]);
+    }
+
+    const handleFavorites = async () => {
+      const result = await getUserFavorites();
+      console.log("Result is ", result)
+      if (!result) return;
+      // check service
+      setPosts([...result.services, ...result.favors]);
     }
 
     // for anonymous user, load recent posts
     if (!user) {
       handleAnonymous();
+    } else {
+      handleFavorites();
     }
   }, [user])
 
@@ -43,16 +52,15 @@ function Home(): JSX.Element {
       </div>
       <div className="w-75 p-4">
         <h3 className="fw-light">
-          {user
-            ? 'Favorite Service Posts'
-            : 'Recent Service Posts'}
-          <PostSummary postType='service' sortedPosts={servicePosts} />
-        </h3>
-        <h3 className="fw-light">
-          {user
-            ? 'Favorite Favor Posts'
-            : 'Recent Favor Posts'}
-          <PostSummary postType='favor' sortedPosts={favorPosts} />
+          {posts.length > 0 && (
+            <>
+            <Text>{user ? 'Favorite Posts': 'Recent Posts'}</Text>
+            <PostSummary postType='service' sortedPosts={posts} />
+            </>
+          )}
+          {
+            posts.length === 0 && user && 'Your Favorites Will Appear Here'
+          }
         </h3>
       </div>
     </div>
