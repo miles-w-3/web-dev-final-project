@@ -7,6 +7,7 @@ import {
   removeFavorite,
   addFavorite,
   removeFavor,
+  getIsFavorite,
 } from "../clients/post";
 import {
   Box,
@@ -43,7 +44,9 @@ export function FavorPost() {
         navigate('/');
         return;
       }
+
       setCurrentFavor(favorFromBackend);
+      setIsFavorite(await getIsFavorite(currentFavorId));
     };
 
     getCurrentFavor();
