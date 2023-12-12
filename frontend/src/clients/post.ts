@@ -10,13 +10,18 @@ export function addService(postContent: Service) {
 
 // get service, translating the serialized date back into a Date instance
 export async function getService(serviceId: string): Promise<Service | undefined> {
-  const result = (await webClient.get(`${POSTS_URL}/service/${serviceId}`)).data;
-  if (!result) return undefined;
+  let result;
+  try {
+    result = (await webClient.get(`${POSTS_URL}/service/${serviceId}`));
+  }
+  catch {
+    return undefined;
+  }
+  if (!result || !result.data) return undefined;
 
-  const serviceDetails: Service = {...result, datePosted: new Date(result.datePosted) }
+  const serviceDetails: Service = {...result.data, datePosted: new Date(result.data.datePosted) }
   return serviceDetails;
 }
-
 
 export async function purchaseService(serviceId: string) {
   const userInfo = await webClient.put<UserDetails>(`${POSTS_URL}/service/${serviceId}`);
@@ -29,12 +34,18 @@ export function addFavor(postContent: Favor) {
 
 // get favor, translating serialized date fields
 export async function getFavor(favorId: string): Promise<Favor | undefined> {
-  const result = (await webClient.get(`${POSTS_URL}/favor/${favorId}`)).data;
-  if (!result) return undefined;
+  let result;
+  try {
+    result = (await webClient.get(`${POSTS_URL}/favor/${favorId}`));
+  }
+  catch {
+    return undefined;
+  }
+  if (!result || !result.data) return undefined;
 
-  const favorDetails: Favor = { ...result,
-    datePosted: new Date(result.datePosted),
-    dateNeeded: new Date(result.dateNeeded),
+  const favorDetails: Favor = { ...result.data,
+    datePosted: new Date(result.data.datePosted),
+    dateNeeded: new Date(result.data.dateNeeded),
   }
   return favorDetails;
 }
@@ -93,4 +104,12 @@ export async function getAnonymousPosts() {
   const result = await webClient.get(`${POSTS_URL}/anonymous`);
   if (!result.data) return undefined;
   return result.data as Posts;
+}
+
+export function removeFavor(postId: string) {
+  return webClient.delete(`${POSTS_URL}/favor/${postId}`);
+}
+
+export function removeService(postId: string) {
+  return webClient.delete(`${POSTS_URL}/service/${postId}`);
 }

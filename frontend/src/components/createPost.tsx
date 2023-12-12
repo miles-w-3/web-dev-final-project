@@ -83,7 +83,7 @@ export function CreatePost( { hide, showing, userType }:CreatePostProps) {
       }
     } catch {
         toast({
-          title: 'Failed To save updates',
+          title: 'Failed to create post',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -95,7 +95,7 @@ export function CreatePost( { hide, showing, userType }:CreatePostProps) {
     setSelectedPrice(0);
 
     toast({
-      title: 'Successfully updated',
+      title: 'Successfully created post',
       status: 'success',
       duration: 3000,
       isClosable: true,
