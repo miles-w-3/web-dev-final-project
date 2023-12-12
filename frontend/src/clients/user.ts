@@ -15,6 +15,12 @@ export async function getLoggedInUserDetails() {
   return result;
 }
 
+// get anonymous details about a user, no auth needed
+export async function getAnonymousDetails(uid: string) {
+  const result = (await webClient.get<UserDetails>(`${USERS_URL}/anonymous/${uid}`));
+  return result;
+}
+
 export async function getUserDetails(uid: string) {
   const result = await webClient.get<UserDetails>(`${USERS_URL}/profile/${uid}`);
   console.log(`ud result is ${JSON.stringify(result)}`);

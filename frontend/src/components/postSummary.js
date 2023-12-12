@@ -1,4 +1,4 @@
-import { Box, Text, Link } from '@chakra-ui/react';
+import { Box, Text, Link, Badge, Flex, Button, Avatar } from '@chakra-ui/react';
 import React from 'react';
 const PostSummary = ({sortedPosts, postType }) => {
     if (!sortedPosts) {
@@ -14,17 +14,28 @@ const PostSummary = ({sortedPosts, postType }) => {
                     style={{ width: '16rem' }}
                 >
                     <Box p={4}>
-                        <Text fontSize='xl' fontWeight='bold' mb={2}>
-                            {post.name}
-                        </Text>
+                        <Flex
+                            align='center'
+                            justify='space-between'
+                        >
+                            <Text fontSize='xl' fontWeight='bold' mb={2}>
+                                {post.name}
+                            </Text>
+                            <Button bgColor='white'>
+                                <Link href={`/profile/${post.postedBy}`}>
+                                    <Avatar size='sm' bg='green.600' />
+                                </Link>
+                            </Button>
+                        </Flex>
                         <Text mb={2}>{post.description}</Text>
                         {post.distance != null && <Text>Distance: {post.distance} miles</Text>}
-                        <button
-                            className="btn btn-warning">
+                        {post.price != null && <Text> Price: <Badge variant="outline">{`$${post.price}`}</Badge></Text>}
+                        <Button
+                            colorScheme='cyan'>
                             <Link href={`/${postType}/${post.id}`} color='black'>
                                 View Details
                             </Link>
-                        </button>
+                        </Button>
                     </Box>
                 </Box>
             ))}

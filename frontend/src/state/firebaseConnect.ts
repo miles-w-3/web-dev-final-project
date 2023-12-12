@@ -15,5 +15,5 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-//auth.setPersistence(auth.Persistence.NONE);
+auth.setPersistence({type: 'NONE'});
 export default app;

@@ -56,6 +56,19 @@ export class UsersController extends Controller {
     if (userDetails) foundResponse(200, userDetails);
   }
 
+  @Get('anonymous/{userId}')
+  public async anonGetProfile(userId: string,
+    @Res() foundResponse: TsoaResponse<200, UserDetails>) {
+
+    const userDetails = await this._getProfileHelper(userId);
+    if (userDetails) {
+      // make the email anonymous
+      userDetails.email = '<Hidden>'
+      foundResponse(200, userDetails);
+    }
+  }
+
+
   @Get('profile/{uid}')
   @Middlewares(ensureToken)
   public async getProfileByID(uid: string,

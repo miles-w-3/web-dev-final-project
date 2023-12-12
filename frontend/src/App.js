@@ -26,7 +26,7 @@ function App() {
                             <Route path='/search' element={<SearchComponent />} />
                             <Route path='/login' element={<UserAuth />} />
                             <Route path='/profile' element={<UserProfile />} />
-                            <Route path='/profile/:uid' element={<UserProfile />} />
+                            <Route path='/profile/:profileId' element={<UserProfile />} />
                             <Route path='/service/:serviceId' element={<ServicePost />} />
                             <Route path='/favor/:favorId' element={<FavorPost />} />
                             <Route path='/posts' element={<MyPostsComponent />} />

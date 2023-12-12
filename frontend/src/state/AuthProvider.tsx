@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     console.log(`got loggedin user ${JSON.stringify(loggedInUser)}`);
     console.log(`Token is ${idToken}`)
     await logInUser(idToken);
-    console.log(`COMPLETED LOGIN`)
 
   }
 
@@ -60,9 +59,6 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser ?? undefined);
-      if (!currentUser) {
-        nav('/login');
-      }
       console.log("Auth changed:", currentUser);
     });
 
