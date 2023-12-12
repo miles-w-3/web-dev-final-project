@@ -17,8 +17,6 @@ export default function UserProfile() {
   const [currentUser, setCurrentUser] = useState<string | undefined>();
   const [showingCreatePost, setShowingCreatePost] = useState<boolean>(false);
   let { profileId } = useParams();
-  console.log(`Profile is ${JSON.stringify(profileId)}, test is ${!profileId && !userContext.user}`);
-
 
   const toast = useToast();
 

@@ -1,7 +1,7 @@
 /* global google */
 import React, { useCallback, useEffect, useState } from 'react';
 import { getAllData } from "../clients/post";
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
@@ -11,13 +11,14 @@ import PostSummary from './postSummary'
 import { useAuthContext } from '../state/useAuthContext';
 
 function SearchComponent() {
+  const authContext = useAuthContext();
   const [address, setAddress] = useState('');
   const [keyword, setKeyword] = useState('');
   const [postType, setPostType] = useState("service");
   const [posts, setPosts] = useState(undefined);
   const [sortedPosts, setSortedPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const authContext = useAuthContext();
+  const [hasSearched, setHasSearched] = useSearchParams(false);
 
   const handleSelect = async (selectedAddress) => {
     const results = await geocodeByAddress(selectedAddress);
@@ -58,34 +59,69 @@ function SearchComponent() {
 
   const handleUpdateParams = () => {
     setSearchParams({ searchType: postType, searchKeyword: keyword ?? '', searchAddress: address });
-    handleGoToSearchResults();
   }
 
 
-  const handleGoToSearchResults = useCallback(async () => {
-    console.log(`Running handleGoto`)
-    if (address) {
+
+
+  // updates the posts whenever they change
+  useEffect(() => {
+    // sample posts for now
+    //setPosts({ "services": [{ "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 1, "name": "Can Opener", "description": "Can Opener", "location": { "lng": -71.06532159999999, "lat": 42.3616256 }, "datePosted": "2023-12-11T16:48:02.145Z", "id": "9Iv4S9WmjiUjoHTqBoiR" }, { "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 11, "name": "Dog walking", "description": "sample desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T15:36:13.505Z", "purchasedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "id": "LMlZ8HRRhVXQTYrU7FGl" }, { "postedBy": "S8Ok5Rb8fFh9g81OvVlyUtPvf033", "price": 26, "name": "I want stuff", "description": "stuff", "location": { "lng": -75.69719309999999, "lat": 45.4215296 }, "datePosted": "2023-12-11T01:19:08.780Z", "purchasedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "id": "OqL7YM3uAIMttrqdhNi5" }, { "postedBy": "S8Ok5Rb8fFh9g81OvVlyUtPvf033", "price": 4, "name": "g", "description": "g", "location": { "lng": -71.08761439999999, "lat": 42.3718494 }, "datePosted": "2023-12-11T01:13:01.440Z", "id": "VbfQ8v2IKEHyJmxZ6Pk5" }, { "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 1000, "name": "Test seller ", "description": "Testing seller desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T04:09:14.467Z", "id": "dGfJNm0CMmOP6I99zNne" }], "favors": [{ "postedBy": "PW6RWFkr7uXa1sKWuUY9du7vsKP2", "dateNeeded": "2023-12-11T01:11:37.185Z", "name": "r", "description": "r", "location": { "lng": -71.1439322, "lat": 42.3566466 }, "datePosted": "2023-12-11T01:11:47.529Z", "id": "949NAxCHwX7SVjJjxpRN" }, { "postedBy": "zdkvuKonbSbS4BHfcXLZYCrv5Lw1", "dateNeeded": "2023-12-11T01:27:22.695Z", "name": "Test", "description": "Test", "location": { "lng": -71.062146, "lat": 42.366198 }, "datePosted": "2023-12-11T01:27:45.746Z", "id": "AYcdsOSBOnzPYEyKgqOP" }, { "postedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "dateNeeded": "2023-12-10T15:36:50.850Z", "name": "Need a drill", "description": "help", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T15:37:06.438Z", "acceptedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "id": "CsQlfo4xNRhbXQNFpryV" }, { "postedBy": "zdkvuKonbSbS4BHfcXLZYCrv5Lw1", "dateNeeded": "2023-12-11T01:22:36.801Z", "name": "Test req", "description": "test req", "location": { "lng": -97.7430608, "lat": 30.267153 }, "datePosted": "2023-12-11T01:22:49.933Z", "id": "Gb4JGc1MFFPgonNCIYNU" }, { "postedBy": "PW6RWFkr7uXa1sKWuUY9du7vsKP2", "dateNeeded": "2023-12-11T01:11:01.530Z", "name": "i want stuff", "description": "stuff", "location": { "lng": -71.0590624, "lat": 42.3604802 }, "datePosted": "2023-12-11T01:11:18.824Z", "id": "MJ2gRU4ae58aEAW5HdqB" }, { "postedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "dateNeeded": "2023-12-17T04:10:00.000Z", "name": "Test req", "description": "req desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T04:10:48.329Z", "id": "Tsc4lf7UR4F5bTuIOfmS" }, { "postedBy": "tB7u6JQvoic0vgZiKA1SJ72TlKc2", "dateNeeded": "2023-12-11T23:16:31.536Z", "name": "Testing", "description": "My Tests", "location": { "lng": -71.0853789, "lat": 42.3428657 }, "datePosted": "2023-12-11T23:17:51.124Z", "id": "VISRnQzDjKNeEskae31N" }, { "postedBy": "pbGXylT8jbMUMbMiYcSbEfEDO3j1", "dateNeeded": "2023-12-11T01:07:11.642Z", "name": "Need stuff", "description": "stuff", "location": { "lng": -71.06532159999999, "lat": 42.3616256 }, "datePosted": "2023-12-11T01:07:24.854Z", "id": "XIARWphWgn8KbZUZ9DNk" }, { "postedBy": "pbGXylT8jbMUMbMiYcSbEfEDO3j1", "dateNeeded": "2023-12-11T01:08:14.970Z", "name": "Test Request", "description": "Test", "location": { "lng": -71.04552149999999, "lat": 42.3516339 }, "datePosted": "2023-12-11T01:08:59.586Z", "id": "yrBhyVLPHHFDwRgvktJq" }] });
+    const fetchPosts = async () => {
+      try {
+        const response = await getAllData();
+        setPosts(response);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+
+  // update search params when url changes, and render results
+  useEffect(() => {
+
+
+    const searchAddress = searchParams.get('searchAddress');
+    if (searchAddress) {
+      setAddress(searchAddress);
+    }
+    const searchKeyword = searchParams.get('searchKeyword')
+    if (searchKeyword) setKeyword(searchKeyword);
+
+    const searchType = searchParams.get('searchType');
+    if (searchType) {
+      setPostType(searchType);
+    }
+
+    if (!posts) return;
+
+    const handleGoToSearchResults = async () => {
+      console.log(`Running handleGoto`)
+
       try {
         let updatedPosts;
 
-        console.log(`handleResults`, postType);
-        if (posts === undefined) {
-          updatedPosts = [];
-        }
-        else if (postType === "favor") {
-          updatedPosts = [...posts.favors];
-        } else {
+        if (searchType === "service") {
           updatedPosts = [...posts.services];
         }
+        else if (searchType === "favor") {
+          updatedPosts = [...posts.favors];
+        } else {
+          updatedPosts = [];
+        }
 
-        if (keyword) {
+        if (searchKeyword) {
           updatedPosts = updatedPosts.filter(
             (post) =>
-              post.name.toLowerCase().includes(keyword.toLowerCase())
+              post.name.toLowerCase().includes(searchKeyword.toLowerCase())
           )
         }
 
-        const results = await geocodeByAddress(address);
+        const results = await geocodeByAddress(searchAddress);
         const selectedLatLng = await getLatLng(results[0]);
 
         updatedPosts = await Promise.all(
@@ -104,48 +140,15 @@ function SearchComponent() {
       } catch (error) {
         console.error('Error during search:', error);
       }
-    }
-  }, [address, postType, keyword, posts]);
-
-  // updates the posts whenever they change
-  useEffect(() => {
-    console.log(`In plain useEffect`)
-    setPosts({ "services": [{ "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 1, "name": "Can Opener", "description": "Can Opener", "location": { "lng": -71.06532159999999, "lat": 42.3616256 }, "datePosted": "2023-12-11T16:48:02.145Z", "id": "9Iv4S9WmjiUjoHTqBoiR" }, { "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 11, "name": "Dog walking", "description": "sample desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T15:36:13.505Z", "purchasedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "id": "LMlZ8HRRhVXQTYrU7FGl" }, { "postedBy": "S8Ok5Rb8fFh9g81OvVlyUtPvf033", "price": 26, "name": "I want stuff", "description": "stuff", "location": { "lng": -75.69719309999999, "lat": 45.4215296 }, "datePosted": "2023-12-11T01:19:08.780Z", "purchasedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "id": "OqL7YM3uAIMttrqdhNi5" }, { "postedBy": "S8Ok5Rb8fFh9g81OvVlyUtPvf033", "price": 4, "name": "g", "description": "g", "location": { "lng": -71.08761439999999, "lat": 42.3718494 }, "datePosted": "2023-12-11T01:13:01.440Z", "id": "VbfQ8v2IKEHyJmxZ6Pk5" }, { "postedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "price": 1000, "name": "Test seller ", "description": "Testing seller desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T04:09:14.467Z", "id": "dGfJNm0CMmOP6I99zNne" }], "favors": [{ "postedBy": "PW6RWFkr7uXa1sKWuUY9du7vsKP2", "dateNeeded": "2023-12-11T01:11:37.185Z", "name": "r", "description": "r", "location": { "lng": -71.1439322, "lat": 42.3566466 }, "datePosted": "2023-12-11T01:11:47.529Z", "id": "949NAxCHwX7SVjJjxpRN" }, { "postedBy": "zdkvuKonbSbS4BHfcXLZYCrv5Lw1", "dateNeeded": "2023-12-11T01:27:22.695Z", "name": "Test", "description": "Test", "location": { "lng": -71.062146, "lat": 42.366198 }, "datePosted": "2023-12-11T01:27:45.746Z", "id": "AYcdsOSBOnzPYEyKgqOP" }, { "postedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "dateNeeded": "2023-12-10T15:36:50.850Z", "name": "Need a drill", "description": "help", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T15:37:06.438Z", "acceptedBy": "LTmhfVtr8wY7uhsXr3MntA1kfwS2", "id": "CsQlfo4xNRhbXQNFpryV" }, { "postedBy": "zdkvuKonbSbS4BHfcXLZYCrv5Lw1", "dateNeeded": "2023-12-11T01:22:36.801Z", "name": "Test req", "description": "test req", "location": { "lng": -97.7430608, "lat": 30.267153 }, "datePosted": "2023-12-11T01:22:49.933Z", "id": "Gb4JGc1MFFPgonNCIYNU" }, { "postedBy": "PW6RWFkr7uXa1sKWuUY9du7vsKP2", "dateNeeded": "2023-12-11T01:11:01.530Z", "name": "i want stuff", "description": "stuff", "location": { "lng": -71.0590624, "lat": 42.3604802 }, "datePosted": "2023-12-11T01:11:18.824Z", "id": "MJ2gRU4ae58aEAW5HdqB" }, { "postedBy": "CBzwKmEr3OaOOWv9NoARo2Sj6dh1", "dateNeeded": "2023-12-17T04:10:00.000Z", "name": "Test req", "description": "req desc", "location": { "lng": -71.0588801, "lat": 42.3600825 }, "datePosted": "2023-12-10T04:10:48.329Z", "id": "Tsc4lf7UR4F5bTuIOfmS" }, { "postedBy": "tB7u6JQvoic0vgZiKA1SJ72TlKc2", "dateNeeded": "2023-12-11T23:16:31.536Z", "name": "Testing", "description": "My Tests", "location": { "lng": -71.0853789, "lat": 42.3428657 }, "datePosted": "2023-12-11T23:17:51.124Z", "id": "VISRnQzDjKNeEskae31N" }, { "postedBy": "pbGXylT8jbMUMbMiYcSbEfEDO3j1", "dateNeeded": "2023-12-11T01:07:11.642Z", "name": "Need stuff", "description": "stuff", "location": { "lng": -71.06532159999999, "lat": 42.3616256 }, "datePosted": "2023-12-11T01:07:24.854Z", "id": "XIARWphWgn8KbZUZ9DNk" }, { "postedBy": "pbGXylT8jbMUMbMiYcSbEfEDO3j1", "dateNeeded": "2023-12-11T01:08:14.970Z", "name": "Test Request", "description": "Test", "location": { "lng": -71.04552149999999, "lat": 42.3516339 }, "datePosted": "2023-12-11T01:08:59.586Z", "id": "yrBhyVLPHHFDwRgvktJq" }] });
-    const fetchPosts = async () => {
-      try {
-        const response = await getAllData();
-        setPosts(response);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
     };
 
-    //fetchPosts();
+    if (searchAddress) handleGoToSearchResults();
 
-  }, []);
-
-
-  // update search params when url changes
-  useEffect(() => {
-    console.log(`SearchParams is now ${JSON.stringify(searchParams)}`);
-    const searchAddress = searchParams.get('searchAddress');
-    if (searchAddress) {
-      setAddress(searchAddress);
-    }
-    const searchKeyword = searchParams.get('searchKeyword')
-    if (searchKeyword) setKeyword(searchKeyword);
-
-    const searchType = searchParams.get('searchType');
-    if (searchType) {
-      setPostType(searchType);
-    }
-    // run the search results
-    handleGoToSearchResults();
-  }, [searchParams]);
+    // we don't want goToSearchresults to be a dep here, we just want to run search results whenever url changes
+  }, [searchParams, posts]);
 
   return (
     <>
-      {!authContext.user && <Navigate to='/login' />}
       <div className='container mt-4'>
         <div className='row align-items-center pb-4 border-bottom '>
           <div className='col-md-4'>
@@ -238,7 +241,7 @@ function SearchComponent() {
             <PostSummary postType={postType} sortedPosts={sortedPosts}/>
           </div>
         )}
-        {sortedPosts.length === 0 && <p>0 results found, please try again.</p>}
+        {sortedPosts.length === 0 && <p>0 results found</p>}
       </div>
     </>
   );

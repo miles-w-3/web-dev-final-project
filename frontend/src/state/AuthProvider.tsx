@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const nav = useNavigate()
   const [user, setUser] = useState<User | undefined>(undefined);
+  // when the component first starts up, we haven't loaded the auth yet
+  const [loading, setLoading] = useState<boolean>(true);
 
   async function logIn(email: string, password: string) {
     const loggedInUser: UserCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -51,17 +53,16 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       // Handle 401 Unauthorized responses
       if (error.response?.status === 401) {
         nav('/login');
-        console.error("Received 401, logging the user out")
+        console.error("Received 401, logging the user out on client-side");
         logOut();
-
       }
     }
   );
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (currentUser) => {
+      if (loading) setLoading(false); // on the first time, we have loaded the page
       setUser(currentUser ?? undefined);
-      console.log("Auth changed:", currentUser);
     });
 
     return (() => {
@@ -70,11 +71,12 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     })
   }, []);
 
-  const contextFields: AuthContextFields = { user, logIn, logOut, signUp }
+  const contextFields: AuthContextFields = { user, logIn, logOut, signUp, }
 
+  // render children once the loading is complete
   return (
     <AuthContext.Provider value={contextFields}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

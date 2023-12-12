@@ -42,7 +42,7 @@ function MyPostsComponent() {
                 console.error('Error fetching posts:', error);
             }
         };
-
+        console.log(`UserContext is ${authContext.user}`);
         if (authContext.user) fetchPosts();
     }, [authContext.user]);
     console.log(`MyPosts`, JSON.stringify(sortedPosts));
