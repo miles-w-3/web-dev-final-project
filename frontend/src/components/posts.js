@@ -7,7 +7,8 @@ import { getLoggedInUserDetails } from '../clients/user';
 function MyPostsComponent() {
     const [sortedPosts, setMyPosts] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    const [purchasedAccept, setPurchaseAccept] = useState([]);
+    const [purchased, setPurchase] = useState([]);
+    const [accepted, setAccept] = useState([]);
     const [postType, setPostType] = useState("service");
 
 
@@ -20,7 +21,7 @@ function MyPostsComponent() {
                 setPostType(userInfo.userType === "seller" ? "service" : "favor");
 
                 const response = await getPostsByUser();
-                console.log(`response`, response)
+                const acceptResponse = await getAcceptedPurchase();
 
                 if (userInfo.userType === "seller") {
                     setMyPosts(response.services);
@@ -28,9 +29,12 @@ function MyPostsComponent() {
                 } else {
                     setMyPosts(response.favors);
                 }
-                // const acceptResponse = await getAcceptedPurchase();
-                // console.log(`responseAccept`, acceptResponse)
-                // setPurchaseAccept(acceptResponse);
+
+                setPurchase(acceptResponse.services);
+                setAccept(acceptResponse.favors);
+
+
+
             } catch (error) {
                 console.error('Error fetching posts:', error);
             }
@@ -39,14 +43,18 @@ function MyPostsComponent() {
         fetchPosts();
     }, []);
     console.log(`MyPosts`, JSON.stringify(sortedPosts));
-    // console.log(`AcceptedPosts`, JSON.stringify(purchasedAccept));
+    console.log(`Purchase`, JSON.stringify(purchased));
+    console.log(`Accept`, JSON.stringify(accepted));
 
     return (
         <div>
             <h3>My Posts</h3>
             <PostSummary sortedPosts={sortedPosts} postType={postType} />
             <h3>Favorited Posts</h3>
-            <h3>Accepted/Purchased Posts</h3>
+            <h3>Purchased Services</h3>
+            <PostSummary sortedPosts={purchased} postType={"service"} />
+            <h3>Accepted Favors</h3>
+            <PostSummary sortedPosts={accepted} postType={"favor"} />
         </div>
     );
 }
