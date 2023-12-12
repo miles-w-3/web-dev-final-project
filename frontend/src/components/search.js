@@ -17,7 +17,9 @@ function SearchComponent() {
   const [posts, setPosts] = useState(undefined);
   const [sortedPosts, setSortedPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+
+  const [initialRun, setIsInitialRun] = useState(true);
+
   const handleSelect = async (selectedAddress) => {
     const results = await geocodeByAddress(selectedAddress);
     await getLatLng(results[0]);
@@ -60,6 +62,7 @@ function SearchComponent() {
     setSearchParams({ searchType: postType, searchKeyword: keyword ?? '', searchAddress: address });
     handleGoToSearchResults();
   }
+
 
   const handleGoToSearchResults = useCallback(async () => {
     console.log(`Running handleGoto`)
@@ -118,7 +121,9 @@ function SearchComponent() {
     };
 
     fetchPosts();
+
   }, []);
+
 
   // update search params when url changes
   useEffect(() => {
@@ -134,7 +139,8 @@ function SearchComponent() {
     if (searchType) {
       setPostType(searchType);
     }
-  }, [searchParams, sortedPosts]);
+    handleGoToSearchResults();
+  }, [searchParams]);
 
   return (
     <>
@@ -209,8 +215,8 @@ function SearchComponent() {
               className='form-control'
               id='postType'
             >
-              <option value='Service'>Service</option>
-              <option value='Favor'>Favor</option>
+              <option value='service'>Service</option>
+              <option value='favor'>Favor</option>
             </select>
           </div>
           <div className='col-md-1'>
