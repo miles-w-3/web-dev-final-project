@@ -1,3 +1,4 @@
+import { Posts } from '../../../shared/types/posts';
 import { UserDetails, UserLogin, UserRegister, UserType } from '../../../shared/types/users'
 import webClient from './base'
 
@@ -64,4 +65,11 @@ export async function registerUser(email: string, type: string, name: string,
 
 export async function logOutUser() {
   await webClient.post(`${USERS_URL}/logout`);
+}
+
+
+export async function getUserFavorites() {
+  const result = await webClient.get(`${USERS_URL}/favorites`);
+  if (!result.data) return undefined;
+  return result.data as Posts;
 }
