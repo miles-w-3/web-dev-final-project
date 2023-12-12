@@ -117,24 +117,24 @@ export class PostsController extends Controller {
 
   @Get('anonymous')
   public async getAnonymousPosts() {
-
     try {
       const result: Posts = {services: [], favors: []};
 
+      // get services
       const servicesSnapshot = await FirebaseUsage.db.collection('services').get();
-      servicesSnapshot.forEach((doc) => {
-        const sService = doc.data() as SerializedService;
-        sService.id = doc.id;
-        result.services.push(sService);
+      servicesSnapshot.docs.slice(-3).forEach(doc => {
+        const data = doc.data() as SerializedService;
+        data.id = doc.id;
+        result.services.push(data);
       });
 
       const favorsSnapshot = await FirebaseUsage.db.collection('favors').get();
-      favorsSnapshot.forEach((doc) => {
+      favorsSnapshot.docs.slice(-3).forEach((doc) => {
         const sFavor = doc.data() as SerializedFavor;
         sFavor.id = doc.id;
         result.favors.push(sFavor);
       });
-
+      return result;
     } catch {
       this.setStatus(500);
     }
