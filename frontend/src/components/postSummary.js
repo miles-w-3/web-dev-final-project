@@ -1,7 +1,11 @@
-import { Box, Text, Link, Avatar } from "@chakra-ui/react";
+import { Box, Text, Link, Avatar, Flex, Button } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
 import React from "react";
+import { useAuthContext } from "../state/useAuthContext";
+
 const PostSummary = ({ sortedPosts, postType }) => {
+  const authContext = useAuthContext();
+
   if (!sortedPosts) {
     return <></>;
   }

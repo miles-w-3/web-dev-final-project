@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { Box, Text, Flex, Badge, Link } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 import { AuthContextFields } from "../state/AuthContext";
+import { SerializedFavor, SerializedService } from "../../../shared/types/posts";
 
 function Home(): JSX.Element {
+    const [sortedPosts, setMyPosts] = useState<SerializedFavor[] | SerializedService[]>([]);
+
+    // Favorite Services and Favorite Favors 
   const [posts] = useState([
     {
       name: "Sample Service",
