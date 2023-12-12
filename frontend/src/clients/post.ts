@@ -83,9 +83,14 @@ export async function getIsFavorite(postId: string) {
 
 export function addFavorite(postId: string) {
   return webClient.post(`${POSTS_URL}/favorite/${postId}`)
-
 }
 
 export async function removeFavorite(postId: string) {
   return webClient.delete(`${POSTS_URL}/favorite/${postId}`);
+}
+
+export async function getAnonymousPosts() {
+  const result = await webClient.get(`${POSTS_URL}/anonymous`);
+  if (!result.data) return undefined;
+  return result.data as Posts;
 }

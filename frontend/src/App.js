@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SearchComponent from "./components/search";
 import UserAuth from './components/auth';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Box, ChakraProvider, Container } from '@chakra-ui/react';
 import { AuthProvider } from './state/AuthProvider';
 import UserProfile from './components/profile';
 import { Navigation } from './components/navigation';
@@ -20,16 +20,18 @@ function App() {
                 <ChakraProvider>
                     <div className="App">
                         <Navigation />
-                        <Routes>
-                            <Route path='/search' element={<SearchComponent />} />
-                            <Route path='/login' element={<UserAuth />} />
-                            <Route path='/profile' element={<UserProfile />} />
-                            <Route path='/profile/:profileId' element={<UserProfile />} />
-                            <Route path='/service/:serviceId' element={<ServicePost />} />
-                            <Route path='/favor/:favorId' element={<FavorPost />} />
-                            <Route path='/posts' element={<MyPostsComponent />} />
-                            <Route path='/*' element={<Home />} />
-                        </Routes>
+                        <Box >
+                            <Routes>
+                                <Route path='/search' element={<SearchComponent />} />
+                                <Route path='/login' element={<UserAuth />} />
+                                <Route path='/profile' element={<UserProfile />} />
+                                <Route path='/profile/:profileId' element={<UserProfile />} />
+                                <Route path='/service/:serviceId' element={<ServicePost />} />
+                                <Route path='/favor/:favorId' element={<FavorPost />} />
+                                <Route path='/posts' element={<MyPostsComponent />} />
+                                <Route path='/*' element={<Home />} />
+                            </Routes>
+                        </Box>
                     </div>
                 </ChakraProvider>
             </AuthProvider>
