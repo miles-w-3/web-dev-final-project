@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Text, Badge, Link } from "@chakra-ui/react";
+import { Box, Text, Badge, Link, Divider } from "@chakra-ui/react";
 import { useAuthContext } from "../state/useAuthContext";
 import { Posts, SerializedFavor, SerializedService } from "../../../shared/types/posts";
 import { getAnonymousPosts } from "../clients/post";
@@ -60,20 +60,22 @@ function Home(): JSX.Element {
         <h3 className="fw-light">
           {service.length > 0 && (
             <>
-            <Text>{user ? 'Favorite Posts': 'Recent Posts'}</Text>
+            <Text>{user ? 'Favorite Service Posts': 'Recent Service Posts'}</Text>
             <PostSummary postType='service' sortedPosts={service} />
             </>
           )}
           {
-            service.length === 0 && user && 'Your Favorites Will Appear Here'
+            service.length === 0 && user && 'Your Favorite Services Will Appear Here'
           }
+          <Divider />
           {favor.length > 0 && (
               <>
+                <Text>{user ? 'Favorite Favor Posts' : 'Recent Favor Posts'}</Text>
                 <PostSummary postType='favor' sortedPosts={favor} />
               </>
           )}
           {
-              favor.length === 0 && user && ''
+            favor.length === 0 && user && 'Your Favorite Favors Will Appear Here'
           }
         </h3>
       </div>
