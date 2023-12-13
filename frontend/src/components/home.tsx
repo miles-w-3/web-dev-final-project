@@ -50,7 +50,7 @@ function Home(): JSX.Element {
             Huskies on campus!
           </h2>
           <div className="m-5">
-            <Link color="green.600" href="/search" fontSize={24}>
+            <Link color="green.600" href="/#/search" fontSize={24}>
               Search for what you need
             </Link>
           </div>

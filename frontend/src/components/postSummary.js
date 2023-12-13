@@ -16,7 +16,7 @@ const PostSummary = ({ sortedPosts, postType }) => {
         <Box p={4}>
             <Flex align="center" justify="space-between">
             {authContext.user && (
-                <Link href={`/${postType}/${post.id}`} >
+                <Link href={`/#/${postType}/${post.id}`} >
                     <Text fontSize="xl" fontWeight="bold" mb={2}>
                         {post.name}
                     </Text>
@@ -29,7 +29,7 @@ const PostSummary = ({ sortedPosts, postType }) => {
             )}
 
             <Button bgColor="white">
-                <Link href={`/profile/${post.postedBy}`}>
+                <Link href={`/#/profile/${post.postedBy}`}>
                 <Avatar size="sm" bg="green.600" />
                 </Link>
             </Button>
