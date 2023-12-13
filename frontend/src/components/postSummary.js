@@ -1,4 +1,4 @@
-import { Box, Text, Link, Avatar, Flex, Button } from "@chakra-ui/react";
+import { Box, Text, Link, Avatar, Flex, Button, Badge } from "@chakra-ui/react";
 import React from "react";
 import { useAuthContext } from "../state/useAuthContext";
 
@@ -10,34 +10,47 @@ const PostSummary = ({ sortedPosts, postType }) => {
   }
 
   return (
-    <Flex>
+    <Flex flexWrap="wrap" justifyContent="start" mb={5}>
       {sortedPosts.map((post) => (
-        <div key={post.id} className="card m-2" style={{ width: "16rem", height: "10rem" }}>
-        <Box p={4}>
+        <div
+          key={post.id}
+          className="card m-3"
+          style={{ width: "18rem", height: "16rem", display: "flex", flexDirection: "column" }}        >
+          <Box p={4} style={{ flex: 1 }}>
             <Flex align="center" justify="space-between">
-            {authContext.user && (
-                <Link href={`/${postType}/${post.id}`} >
-                    <Text fontSize="xl" fontWeight="bold" mb={2}>
-                        {post.name}
-                    </Text>
-                </Link>
-            )}
-            {!authContext.user && (
-                <Text fontSize="xl" fontWeight="bold" mb={2}>
+              {authContext.user && (
+                <Link href={`/${postType}/${post.id}`}>
+                  <Text fontSize="xl"  noOfLines={1} fontWeight="bold" mb={2}>
                     {post.name}
-                </Text>
-            )}
-
-            <Button bgColor="white">
-                <Link href={`/profile/${post.postedBy}`}>
-                <Avatar size="sm" bg="green.600" />
+                  </Text>
                 </Link>
-            </Button>
+              )}
+              {!authContext.user && (
+                <Text noOfLines={1} fontSize="xl" fontWeight="bold" mb={2}>
+                  {post.name}
+                </Text>
+              )}
+
+              <Button bgColor="white">
+                <Link href={`/profile/${post.postedBy}`}>
+                  <Avatar size="sm" bg="green.600" />
+                </Link>
+              </Button>
             </Flex>
             <Text noOfLines={3} mb={2} fontSize={18}>
-            {post.description}
+              {post.description}
             </Text>
-        </Box>
+            </Box>
+            <Box p={4} >
+            {post.distance != null && (
+              <Text fontSize={12} mb={2}>Distance: {post.distance} miles</Text>
+            )}
+            {post.price != null && (
+              <Text fontSize={12} mb={2}>
+                Price: <Badge variant="outline">{`$${post.price}`}</Badge>
+              </Text>
+            )}
+          </Box>
         </div>
       ))}
     </Flex>

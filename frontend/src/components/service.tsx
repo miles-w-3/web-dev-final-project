@@ -23,6 +23,7 @@ import {
 import { useAuthContext } from "../state/useAuthContext";
 import { FaHeart, FaRegHeart, FaTrash } from "react-icons/fa";
 
+
 export function ServicePost() {
   const { serviceId } = useParams();
   const [currentServiceId, setCurrentServiceId] = useState<string|undefined>(serviceId);
@@ -157,98 +158,107 @@ export function ServicePost() {
   }
 
 
-  return (
-    <>
-      {currentServiceId && currentService && (
-        <div className="d-flex justify-content-center">
-          <div className="d-flex justify-content-center align-items-start pt-5">
-            <Box style={{ width: "600px" }}>
-              <Flex p={4} align="flex-start" justify="space-between">
-                <Flex direction="column">
-                  <Text fontSize={24} fontWeight="bold">
-                    {currentService.name}
-                  </Text>
-                  <Text color="gray">Service</Text>
-                  <Text>{currentService.description}</Text>
-                </Flex>
-                <Box>
-                  <IconButton
-                    className="ms-4"
-                    icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
-                    onClick={handleFavorite}
-                    aria-label={isFavorite ? "Unfavorite" : "Favorite"}
-                  />
-                  {currentService.postedBy === authContext.user?.uid && <IconButton
-                    className="ms-4"
-                    colorScheme="red"
-                    icon={<FaTrash />}
-                    onClick={handleDelete}
-                    aria-label="delete-favor"
-                  />}
-                </Box>
-              </Flex>
-              <Divider />
-              <Box p={4}>
-                <Flex direction="column">
-                  <Flex justify="space-between" align="start">
-                    <Text fontSize="lg" color="gray">
-                      Posted by:{" "}
-                      <Link
-                        color="green.600"
-                        href={`/profile/${currentService.postedBy}`}
-                      >
-                        {currentService.postedByName}
-                      </Link>
-                    </Text>
+ 
 
-                    {currentService.purchasedBy && (
-                      <Badge colorScheme="red" fontSize="sm">
-                        Purchased by:{" "}
-                        <Link
-                          color="green.600"
-                          href={`/profile/${currentService.purchasedBy}`}
-                        >
-                          {currentService.purchasedByName}
-                        </Link>
-                      </Badge>
-                    )}
-                    {!currentService.purchasedBy && (
-                      <Button
-                        ml={2}
-                        hidden={
-                          authContext.user?.uid === currentService.postedBy
-                        }
-                        onClick={handlePurchase}
-                      >
-                        Purchase
-                      </Button>
-                    )}
-                  </Flex>
-                  <Text fontSize="lg" color="gray">
-                    Location:{" "}
-                    {address}
-                  </Text>
-                  <Text fontSize="sm" color="gray">
-                    Posted at{" "}
-                    {new Date(currentService.datePosted).toLocaleString(
-                      "en-US",
-                      {
-                        weekday: "short",
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        hour12: true,
-                      }
-                    )}
-                  </Text>
-                </Flex>
-              </Box>
+return (
+  <>
+    {currentServiceId && currentService && (
+      <Flex justify="center">
+        <Box width="600px" p={4}>
+          <Flex align="start" justify="space-between" mb={4}>
+            <Box>
+              <Text fontSize={24} fontWeight="bold">
+                {currentService.name}
+              </Text>
             </Box>
-          </div>
-        </div>
-      )}
-    </>
-  );
+            <Flex>
+              <IconButton
+                className="ms-4"
+                icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                onClick={handleFavorite}
+                aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+              />
+              {currentService.postedBy === authContext.user?.uid && (
+                <IconButton
+                  className="ms-4"
+                  colorScheme="red"
+                  icon={<FaTrash />}
+                  onClick={handleDelete}
+                  aria-label="delete-favor"
+                />
+              )}
+            </Flex>
+          </Flex>
+
+          <Flex justify="space-between" mb={4}>
+          <Text color="gray">Service</Text>
+            {currentService.price != null && (
+              <Text color="gray">
+                Price: <Badge variant="outline">{`$${currentService.price}`}</Badge>
+              </Text>
+            )}
+          </Flex>
+
+          <Box>
+            <Text>{currentService.description}</Text>
+          </Box>
+
+          <Divider />
+
+          <Box mt={4}>
+            <Flex direction="column">
+              <Flex justify="space-between" align="start">
+                <Text fontSize="lg" color="gray">
+                  Posted by:{" "}
+                  <Link
+                    color="green.600"
+                    href={`/profile/${currentService.postedBy}`}
+                  >
+                    {currentService.postedByName}
+                  </Link>
+                </Text>
+                {currentService.purchasedBy && (
+                  <Badge colorScheme="red" fontSize="sm">
+                    Purchased by:{" "}
+                    <Link
+                      color="green.600"
+                      href={`/profile/${currentService.purchasedBy}`}
+                    >
+                      {currentService.purchasedByName}
+                    </Link>
+                  </Badge>
+                )}
+                {!currentService.purchasedBy && (
+                  <Button
+                    ml={2}
+                    hidden={authContext.user?.uid === currentService.postedBy}
+                    onClick={handlePurchase}
+                  >
+                    Purchase
+                  </Button>
+                )}
+              </Flex>
+              <Text fontSize="sm" color="gray">
+                Location: {address}
+              </Text>
+              <Text fontSize="sm" color="gray">
+                Posted at{" "}
+                {new Date(currentService.datePosted).toLocaleString("en-US", {
+                  weekday: "short",
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                })}
+              </Text>
+            </Flex>
+          </Box>
+        </Box>
+      </Flex>
+    )}
+  </>
+);
+
 }

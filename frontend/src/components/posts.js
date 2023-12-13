@@ -58,7 +58,7 @@ function MyPostsComponent() {
   return (
     <div className="d-flex flex-column align-items-center ">
       {authContext.user == null && <Navigate to="/login" />}
-      <div className="w-75 p-4">
+      <div className='container mt-4'>
         <h3 className="fw-light">My Posts</h3>
         <PostSummary sortedPosts={sortedPosts} postType={postType} />
 
