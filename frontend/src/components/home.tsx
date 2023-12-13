@@ -8,6 +8,8 @@ import { getUserFavorites } from "../clients/user";
 
 function Home(): JSX.Element {
     const [posts, setPosts] = useState<(SerializedService | SerializedFavor)[]>([]);
+    const [service, setService] = useState<(SerializedService | SerializedFavor)[]>([]);
+    const [favor, setFavor] = useState<(SerializedService | SerializedFavor)[]>([]);
 
   const { user } = useAuthContext();
 
@@ -16,6 +18,8 @@ function Home(): JSX.Element {
       const result = await getAnonymousPosts();
       if (!result) return;
       setPosts([...result.services, ...result.favors]);
+      setService(result.services);
+      setFavor(result.favors)
     }
 
     const handleFavorites = async () => {
@@ -24,6 +28,8 @@ function Home(): JSX.Element {
       if (!result) return;
       // check service
       setPosts([...result.services, ...result.favors]);
+      setService(result.services);
+      setFavor(result.favors)
     }
 
     // for anonymous user, load recent posts
@@ -52,14 +58,22 @@ function Home(): JSX.Element {
       </div>
       <div className="w-75 p-4">
         <h3 className="fw-light">
-          {posts.length > 0 && (
+          {service.length > 0 && (
             <>
             <Text>{user ? 'Favorite Posts': 'Recent Posts'}</Text>
-            <PostSummary postType='service' sortedPosts={posts} />
+            <PostSummary postType='service' sortedPosts={service} />
             </>
           )}
           {
-            posts.length === 0 && user && 'Your Favorites Will Appear Here'
+            service.length === 0 && user && 'Your Favorites Will Appear Here'
+          }
+          {favor.length > 0 && (
+              <>
+                <PostSummary postType='favor' sortedPosts={favor} />
+              </>
+          )}
+          {
+              favor.length === 0 && user && ''
           }
         </h3>
       </div>

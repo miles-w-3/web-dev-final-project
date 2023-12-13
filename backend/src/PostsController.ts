@@ -88,7 +88,6 @@ export class PostsController extends Controller {
   }
 
   @Get()
-  @Middlewares(ensureToken)
   public async getAllData() {
     try {
       const allPosts: Posts = {services:[], favors:[]};

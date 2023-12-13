@@ -61,12 +61,9 @@ function SearchComponent() {
     setSearchParams({ searchType: postType, searchKeyword: keyword ?? '', searchAddress: address });
   }
 
-
-
-
   // updates the posts whenever they change
   useEffect(() => {
-    if (!authContext.user) return;
+    // if (!authContext.user) return;
     // sample posts for now
     const fetchPosts = async () => {
       try {
@@ -148,7 +145,7 @@ function SearchComponent() {
 
   return (
     <>
-    {!authContext.user && <Navigate to='/login' />}
+    {/*{!authContext.user && <Navigate to='/login' />}*/}
       <div className='container mt-4'>
         <div className='row align-items-center pb-4 border-bottom '>
           <div className='col-md-4'>

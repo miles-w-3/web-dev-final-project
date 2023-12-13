@@ -32,6 +32,47 @@ export function FavorPost() {
   const toast = useToast();
   const navigate = useNavigate();
 
+  const [address, setAddress] = useState<string | undefined>();
+
+  function getAddress(location: any): Promise<string> {
+    const geocoder = new google.maps.Geocoder();
+    const lat = location.lat;
+    const lng = location.lng;
+    const latlng = { lat, lng };
+
+    return new Promise<string>((resolve, reject) => {
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const stateResult = results[0].address_components.find(component => component.types.includes('administrative_area_level_1'));
+          const state = stateResult ? stateResult.long_name : '';
+          const cityResult = results[0].address_components.find(component => component.types.includes('locality'));
+          const city = cityResult ? cityResult.long_name : '';
+          const countryResult = results[0].address_components.find(component => component.types.includes('country'));
+          const country = countryResult ? countryResult.long_name : '';
+          const postLocation = city.concat(", " + state).concat(", " + country)
+          resolve(postLocation);
+        } else {
+          reject(`Geocoder failed`);
+        }
+      });
+    });
+  }
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        if (currentFavor) {
+          const result = await getAddress(currentFavor.location);
+          setAddress(result);
+        }
+      } catch (error) {
+        console.error('Error fetching address:', error);
+      }
+    };
+
+    fetchAddress();
+  }, [currentFavor]);
+
   useEffect(() => {
     const getCurrentFavor = async () => {
       if (!currentFavorId) {
@@ -203,6 +244,10 @@ export function FavorPost() {
                       minute: "numeric",
                       hour12: true,
                     })}
+                  </Text>
+                  <Text fontSize="lg" color="gray">
+                    Location:{" "}
+                    {address}
                   </Text>
                 </Flex>
               </Box>
