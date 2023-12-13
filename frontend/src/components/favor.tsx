@@ -195,7 +195,7 @@ export function FavorPost() {
                       Posted by:{" "}
                       <Link
                         color="green.600"
-                        href={`/profile/${currentFavor.postedBy}`}
+                        href={`/#/profile/${currentFavor.postedBy}`}
                       >
                         {currentFavor.postedByName}
                       </Link>
@@ -205,7 +205,7 @@ export function FavorPost() {
                         Accepted by:{" "}
                         <Link
                           color="green.600"
-                          href={`/profile/${currentFavor.acceptedBy}`}
+                          href={`/#/profile/${currentFavor.acceptedBy}`}
                         >
                           {currentFavor.acceptedByName}
                         </Link>

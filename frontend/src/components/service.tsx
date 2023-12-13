@@ -195,7 +195,7 @@ export function ServicePost() {
                       Posted by:{" "}
                       <Link
                         color="green.600"
-                        href={`/profile/${currentService.postedBy}`}
+                        href={`/#/profile/${currentService.postedBy}`}
                       >
                         {currentService.postedByName}
                       </Link>
@@ -206,7 +206,7 @@ export function ServicePost() {
                         Purchased by:{" "}
                         <Link
                           color="green.600"
-                          href={`/profile/${currentService.purchasedBy}`}
+                          href={`/#/profile/${currentService.purchasedBy}`}
                         >
                           {currentService.purchasedByName}
                         </Link>
