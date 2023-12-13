@@ -12,6 +12,7 @@ import { useAuthContext } from "../state/useAuthContext";
 function MyPostsComponent() {
   const [sortedPosts, setMyPosts] = useState([]);
   const [favoritesServices, setFavoritesServices] = useState([]);
+  const [favoritesFavors, setFavoriteFavors] = useState([])
   const [purchased, setPurchase] = useState([]);
   const [accepted, setAccept] = useState([]);
   const [postType, setPostType] = useState("service");
@@ -41,7 +42,10 @@ function MyPostsComponent() {
         const result = await getUserFavorites();
         if (!result) return;
         // check service
-        setFavoritesServices(result.favors.concat(result.services));
+        setFavoritesServices(result.services);
+        setFavoriteFavors(result.favors);
+
+
 
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -60,6 +64,7 @@ function MyPostsComponent() {
 
         <h3 className="fw-light">Favorited Posts</h3>
         <PostSummary sortedPosts={favoritesServices} postType={"service"} />
+        <PostSummary sortedPosts={favoritesFavors} postType={"favor"} />
 
         <h3 className="fw-light">Purchased Services</h3>
         <PostSummary sortedPosts={purchased} postType={"service"} />

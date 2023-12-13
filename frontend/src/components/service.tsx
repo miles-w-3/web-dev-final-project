@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Service } from "../../../shared/types/posts";
+import { Service, Location } from "../../../shared/types/posts";
 import { useNavigate, useParams } from "react-router";
 import {
   getService,
@@ -31,6 +31,46 @@ export function ServicePost() {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const toast = useToast();
   const navigate = useNavigate();
+  const [address, setAddress] = useState<string | undefined>();
+
+  function getAddress(location: any): Promise<string> {
+    const geocoder = new google.maps.Geocoder();
+    const lat = location.lat;
+    const lng = location.lng;
+    const latlng = { lat, lng };
+
+    return new Promise<string>((resolve, reject) => {
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          const stateResult = results[0].address_components.find(component => component.types.includes('administrative_area_level_1'));
+          const state = stateResult ? stateResult.long_name : '';
+          const cityResult = results[0].address_components.find(component => component.types.includes('locality'));
+          const city = cityResult ? cityResult.long_name : '';
+          const countryResult = results[0].address_components.find(component => component.types.includes('country'));
+          const country = countryResult ? countryResult.long_name : '';
+          const postLocation = city.concat(", " + state).concat(", " + country)
+          resolve(postLocation);
+        } else {
+          reject(`Geocoder failed`);
+        }
+      });
+    });
+  }
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        if (currentService) {
+          const result = await getAddress(currentService.location);
+          setAddress(result);
+        }
+      } catch (error) {
+        console.error('Error fetching address:', error);
+      }
+    };
+
+    fetchAddress();
+  }, [currentService]);
 
   // hook on service id selection
   useEffect(() => {
@@ -116,6 +156,7 @@ export function ServicePost() {
     }
   }
 
+
   return (
     <>
       {currentServiceId && currentService && (
@@ -183,6 +224,10 @@ export function ServicePost() {
                       </Button>
                     )}
                   </Flex>
+                  <Text fontSize="lg" color="gray">
+                    Location:{" "}
+                    {address}
+                  </Text>
                   <Text fontSize="sm" color="gray">
                     Posted at{" "}
                     {new Date(currentService.datePosted).toLocaleString(
