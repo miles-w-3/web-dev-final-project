@@ -41,10 +41,12 @@ function SearchComponent() {
             response.rows.length > 0 &&
             response.rows[0].elements.length > 0
           ) {
-            const distance = Math.round(
-              response.rows[0].elements[0].distance.value * 0.000621371
-            );
-            resolve(distance);
+            console.log("Value result is ", response);
+            if (response.rows[0].elements[0].distance) {
+              const distance = response.rows[0].elements[0].distance;
+              resolve(distance);
+            }
+            resolve({text: 'too far', value: 99999999999});
           } else {
             reject(new Error('Error calculating distance'));
           }
@@ -130,7 +132,7 @@ function SearchComponent() {
           })
         );
 
-        updatedPosts.sort((a, b) => a.distance - b.distance);
+        updatedPosts.sort((a, b) => a.distance.value - b.distance.value);
 
         setSortedPosts(updatedPosts);
       } catch (error) {
