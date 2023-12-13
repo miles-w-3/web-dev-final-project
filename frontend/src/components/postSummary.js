@@ -10,7 +10,7 @@ const PostSummary = ({ sortedPosts, postType }) => {
   }
 
   return (
-    <Flex flexWrap="wrap" justifyContent="start" mb={5}>
+    <Flex flexWrap="wrap" justifyContent='start' mb={5}>
       {sortedPosts.map((post) => (
         <div
           key={post.id}
@@ -42,8 +42,8 @@ const PostSummary = ({ sortedPosts, postType }) => {
             </Text>
             </Box>
             <Box p={4} >
-            {post.distance != null && (
-              <Text fontSize={12} mb={2}>Distance: {post.distance} miles</Text>
+            {post.distance != null && post.distance.text && (
+              <Text fontSize={12} mb={2}>Distance: {post.distance.text}</Text>
             )}
             {post.price != null && (
               <Text fontSize={12} mb={2}>
