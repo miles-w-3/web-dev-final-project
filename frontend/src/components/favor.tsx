@@ -25,7 +25,9 @@ import { FaHeart, FaRegHeart, FaTrash } from "react-icons/fa";
 
 export function FavorPost() {
   let { favorId } = useParams();
-  const [currentFavorId, setCurrentFavorId] = useState<string | undefined>(favorId)
+  const [currentFavorId, setCurrentFavorId] = useState<string | undefined>(
+    favorId
+  );
   const [currentFavor, setCurrentFavor] = useState<Favor | undefined>();
   const authContext = useAuthContext();
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -42,14 +44,20 @@ export function FavorPost() {
 
     return new Promise<string>((resolve, reject) => {
       geocoder.geocode({ location: latlng }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          const stateResult = results[0].address_components.find(component => component.types.includes('administrative_area_level_1'));
-          const state = stateResult ? stateResult.long_name : '';
-          const cityResult = results[0].address_components.find(component => component.types.includes('locality'));
-          const city = cityResult ? cityResult.long_name : '';
-          const countryResult = results[0].address_components.find(component => component.types.includes('country'));
-          const country = countryResult ? countryResult.long_name : '';
-          const postLocation = city.concat(", " + state).concat(", " + country)
+        if (status === "OK" && results && results[0]) {
+          const stateResult = results[0].address_components.find((component) =>
+            component.types.includes("administrative_area_level_1")
+          );
+          const state = stateResult ? stateResult.long_name : "";
+          const cityResult = results[0].address_components.find((component) =>
+            component.types.includes("locality")
+          );
+          const city = cityResult ? cityResult.long_name : "";
+          const countryResult = results[0].address_components.find(
+            (component) => component.types.includes("country")
+          );
+          const country = countryResult ? countryResult.long_name : "";
+          const postLocation = city.concat(", " + state).concat(", " + country);
           resolve(postLocation);
         } else {
           reject(`Geocoder failed`);
@@ -66,7 +74,7 @@ export function FavorPost() {
           setAddress(result);
         }
       } catch (error) {
-        console.error('Error fetching address:', error);
+        console.error("Error fetching address:", error);
       }
     };
 
@@ -76,13 +84,13 @@ export function FavorPost() {
   useEffect(() => {
     const getCurrentFavor = async () => {
       if (!currentFavorId) {
-        navigate('/');
+        navigate("/");
         return;
       }
 
       const favorFromBackend = await getFavor(currentFavorId);
       if (!favorFromBackend) {
-        navigate('/');
+        navigate("/");
         return;
       }
 
@@ -146,8 +154,7 @@ export function FavorPost() {
         isClosable: true,
       });
       setCurrentFavorId(undefined); // force navigation away from page
-    }
-    catch {
+    } catch {
       toast({
         title: "Failed to delete favor post",
         status: "error",
@@ -155,105 +162,110 @@ export function FavorPost() {
         isClosable: true,
       });
     }
-  }
+  };
 
   return (
     <>
       {currentFavorId && currentFavor && (
-        <div className="d-flex justify-content-center">
-          <div className="d-flex justify-content-center align-items-start pt-5">
-            <Box style={{ width: "600px" }}>
-              <Flex p={4} align="flex-start" justify="space-between">
-                <Flex direction="column">
-                  <Text fontSize={24} fontWeight="bold">
-                    {currentFavor.name}
-                  </Text>
-                  <Text color="gray">Favor</Text>
-                  <Text>{currentFavor.description}</Text>
-                </Flex>
-                <Box>
+        <Flex justify="center">
+          <Box width="600px" p={4}>
+            <Flex align="start" justify="space-between" mb={4}>
+              <Box>
+                <Text fontSize={24} fontWeight="bold">
+                  {currentFavor.name}
+                </Text>
+              </Box>
+              <Flex>
+                <IconButton
+                  className="ms-4"
+                  icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
+                  onClick={handleFavorite}
+                  aria-label={isFavorite ? "Unfavorite" : "Favorite"}
+                />
+                {currentFavor.postedBy === authContext.user?.uid && (
                   <IconButton
-                    className="ms-4"
-                    icon={isFavorite ? <FaHeart /> : <FaRegHeart />}
-                    onClick={handleFavorite}
-                    aria-label={isFavorite ? "Unfavorite" : "Favorite"}
-                  />
-                  {currentFavor.postedBy === authContext.user?.uid && <IconButton
                     className="ms-4"
                     colorScheme="red"
                     icon={<FaTrash />}
                     onClick={handleDelete}
                     aria-label="delete-favor"
-                  />}
-                </Box>
+                  />
+                )}
               </Flex>
-              <Divider />
-              <Box p={4}>
-                <Flex direction="column">
-                  <Flex justify="space-between" align="start">
-                    <Text fontSize="lg" color="gray">
-                      Posted by:{" "}
+            </Flex>
+
+            <Flex justify="space-between" mb={4}>
+              <Text color="gray">Favor</Text>
+            </Flex>
+            <Box>
+              <Text>{currentFavor.description}</Text>
+            </Box>
+            <Divider />
+
+            <Box mt={4}>
+              <Flex direction="column">
+                <Flex justify="space-between" align="start">
+                  <Text fontSize="lg" color="gray">
+                    Posted by:{" "}
+                    <Link
+                      color="green.600"
+                      href={`/profile/${currentFavor.postedBy}`}
+                    >
+                      {currentFavor.postedByName}
+                    </Link>
+                  </Text>
+                  {currentFavor.acceptedBy && (
+                    <Badge colorScheme="red" fontSize="sm">
+                      Accepted by:{" "}
                       <Link
                         color="green.600"
-                        href={`/profile/${currentFavor.postedBy}`}
+                        href={`/profile/${currentFavor.acceptedBy}`}
                       >
-                        {currentFavor.postedByName}
+                        {currentFavor.acceptedByName}
                       </Link>
-                    </Text>
-                    {currentFavor.acceptedBy && (
-                      <Badge colorScheme="red" fontSize="sm">
-                        Accepted by:{" "}
-                        <Link
-                          color="green.600"
-                          href={`/profile/${currentFavor.acceptedBy}`}
-                        >
-                          {currentFavor.acceptedByName}
-                        </Link>
-                      </Badge>
-                    )}
-                    {!currentFavor.acceptedBy && (
-                      <Button
-                        ml={2}
-                        hidden={authContext.user?.uid === currentFavor.postedBy}
-                        onClick={handleAccept}
-                      >
-                        Accept
-                      </Button>
-                    )}
-                  </Flex>
-                  <Text fontSize="sm" color="gray">
-                    Posted at{" "}
-                    {new Date(currentFavor.datePosted).toLocaleString("en-US", {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "numeric",
-                      hour12: true,
-                    })}
-                  </Text>
-                  <Text fontSize="sm" color="gray">
-                    Needed by{" "}
-                    {new Date(currentFavor.dateNeeded).toLocaleString("en-US", {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "numeric",
-                      hour12: true,
-                    })}
-                  </Text>
-                  <Text fontSize="lg" color="gray">
-                    Location:{" "}
-                    {address}
-                  </Text>
+                    </Badge>
+                  )}
+                  {!currentFavor.acceptedBy && (
+                    <Button
+                      ml={2}
+                      hidden={authContext.user?.uid === currentFavor.postedBy}
+                      onClick={handleAccept}
+                    >
+                      Accept
+                    </Button>
+                  )}
                 </Flex>
-              </Box>
+                <Text fontSize="sm" color="gray">
+                  Location: {address}
+                </Text>
+                <Text fontSize="sm" color="gray">
+                  Posted at{" "}
+                  {new Date(currentFavor.datePosted).toLocaleString("en-US", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                  })}
+                </Text>
+                <Text fontSize="sm" color="gray">
+                  Needed by{" "}
+                  {new Date(currentFavor.dateNeeded).toLocaleString("en-US", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                  })}
+                </Text>
+              </Flex>
             </Box>
-          </div>
-        </div>
+          </Box>
+        </Flex>
       )}
     </>
   );
