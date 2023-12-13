@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import SearchComponent from "./components/search";
 import UserAuth from './components/auth';
 import { Box, ChakraProvider, Container } from '@chakra-ui/react';
